@@ -14,7 +14,7 @@ import { GLOBE_RADIUS } from "./Globe";
 const ZONES = [
   // North America
   { name: "US East", lat: 34, lon: -78, radius: 0.22 },
-  { name: "US West", lat: 37, lon: -119, radius: 0.2 },
+  { name: "US West", lat: 33, lon: -115, radius: 0.2 },
   { name: "Canada", lat: 54, lon: -100, radius: 0.22 },
 
   // South America

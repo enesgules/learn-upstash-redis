@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDatabaseStore } from "@/lib/store/database-store";
-import { regions, type Region } from "@/lib/regions";
+import { regions, getRegionById, type Region } from "@/lib/regions";
 import { estimateLatencyBetweenRegions } from "@/lib/simulation/latency";
 
 interface ContinentGroup {
@@ -11,7 +11,7 @@ interface ContinentGroup {
   regions: Region[];
 }
 
-function groupByContinent(): ContinentGroup[] {
+function groupByContinent(regionList: Region[] = regions): ContinentGroup[] {
   const groups: Record<string, Region[]> = {
     "North America": [],
     "South America": [],
@@ -20,7 +20,7 @@ function groupByContinent(): ContinentGroup[] {
     Africa: [],
   };
 
-  for (const r of regions) {
+  for (const r of regionList) {
     if (
       r.country === "USA" ||
       r.country === "Canada"
@@ -129,7 +129,13 @@ export default function RegionBuilder() {
   const setHoveredRegion = useDatabaseStore((s) => s.setHoveredRegion);
   const reset = useDatabaseStore((s) => s.reset);
 
-  const continentGroups = useMemo(() => groupByContinent(), []);
+  const activeProvider = primaryRegion ? getRegionById(primaryRegion)?.provider : null;
+  const continentGroups = useMemo(() => {
+    const filtered = activeProvider
+      ? regions.filter((r) => r.provider === activeProvider)
+      : regions;
+    return groupByContinent(filtered);
+  }, [activeProvider]);
 
   function getRole(regionId: string): "primary" | "read" | "available" {
     if (regionId === primaryRegion) return "primary";

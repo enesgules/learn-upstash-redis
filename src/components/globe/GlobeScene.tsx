@@ -6,7 +6,7 @@ import { OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import Globe from "./Globe";
 import RegionMarker from "./RegionMarker";
-import { groupRegionsByLocation, getRegionById, type Region } from "@/lib/regions";
+import { regions, groupRegionsByLocation, getRegionById, type Region } from "@/lib/regions";
 import { latLonToVector3 } from "@/lib/geo-utils";
 import { useDatabaseStore } from "@/lib/store/database-store";
 
@@ -77,7 +77,14 @@ export default function GlobeScene({
   primaryRegion = null,
   onReady,
 }: GlobeSceneProps) {
-  const regionGroups = useMemo(() => groupRegionsByLocation(), []);
+  const storePrimary = useDatabaseStore((s) => s.primaryRegion);
+  const activeProvider = storePrimary ? getRegionById(storePrimary)?.provider : null;
+  const regionGroups = useMemo(() => {
+    const filtered = activeProvider
+      ? regions.filter((r) => r.provider === activeProvider)
+      : regions;
+    return groupRegionsByLocation(filtered);
+  }, [activeProvider]);
   const controlsRef = useRef<InstanceType<typeof import("three-stdlib").OrbitControls> | null>(null);
 
   return (

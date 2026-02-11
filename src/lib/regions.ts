@@ -184,6 +184,16 @@ export const regions: Region[] = [
     lat: 50.4697,
     lon: 3.811,
   },
+  {
+    id: "asia-northeast1",
+    code: "asia-northeast1",
+    abbreviation: "ane1",
+    provider: "gcp",
+    city: "Tokyo",
+    country: "Japan",
+    lat: 35.6762,
+    lon: 139.6503,
+  },
 ];
 
 export function getRegionById(id: string): Region | undefined {

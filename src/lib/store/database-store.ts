@@ -40,7 +40,7 @@ export const useDatabaseStore = create<DatabaseState>((set, get) => ({
     if (!state.primaryRegion) {
       state.setPrimary(regionId);
     } else if (regionId === state.primaryRegion) {
-      set({ primaryRegion: null });
+      set({ primaryRegion: null, readRegions: [] });
     } else if (state.readRegions.includes(regionId)) {
       state.removeReadRegion(regionId);
     } else {
