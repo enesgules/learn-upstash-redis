@@ -73,6 +73,7 @@ interface GlobeSceneProps {
   primaryRegion?: string | null;
   onReady?: () => void;
   hideUserLocation?: boolean;
+  showUserDbConnection?: boolean;
 }
 
 export default function GlobeScene({
@@ -83,9 +84,11 @@ export default function GlobeScene({
   primaryRegion = null,
   onReady,
   hideUserLocation = false,
+  showUserDbConnection = false,
 }: GlobeSceneProps) {
   const storePrimary = useDatabaseStore((s) => s.primaryRegion);
-  const activeProvider = storePrimary ? getRegionById(storePrimary)?.provider : null;
+  // Only filter by provider when the page explicitly passes primaryRegion
+  const activeProvider = primaryRegion && storePrimary ? getRegionById(storePrimary)?.provider : null;
   const regionGroups = useMemo(() => {
     const filtered = activeProvider
       ? regions.filter((r) => r.provider === activeProvider)
@@ -157,7 +160,7 @@ export default function GlobeScene({
 
         {/* User's real location */}
         {userLocation && !hideUserLocation && (
-          <UserLocationMarker lat={userLocation.lat} lon={userLocation.lon} />
+          <UserLocationMarker lat={userLocation.lat} lon={userLocation.lon} showDbConnection={showUserDbConnection} />
         )}
 
         {/* Extensibility: experiences inject arcs, packets, etc. */}

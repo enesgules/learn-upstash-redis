@@ -54,6 +54,7 @@ export default function RegionsPage() {
           onRegionClick={handleRegionClick}
           selectedRegions={readRegions}
           primaryRegion={primaryRegion}
+          showUserDbConnection
         >
           <LatencyHeatmap />
           <ConnectionArcs />
@@ -72,7 +73,7 @@ export default function RegionsPage() {
       </div>
 
       {/* Top-right: Latency Stats */}
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-14 right-4 z-20">
         <LatencyStats />
       </div>
 

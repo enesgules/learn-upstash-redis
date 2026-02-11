@@ -69,7 +69,7 @@ export default function SoundToggle() {
   }, [playing, showTooltip]);
 
   return (
-    <div className="fixed right-5 top-14 z-30">
+    <div className="fixed right-5 top-5 z-30">
       <button
         onClick={toggle}
         aria-label={playing ? "Mute background sound" : "Unmute background sound"}

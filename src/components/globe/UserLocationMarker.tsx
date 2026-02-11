@@ -18,6 +18,7 @@ const RING_COUNT = 3;
 interface UserLocationMarkerProps {
   lat: number;
   lon: number;
+  showDbConnection?: boolean;
 }
 
 function findNearestRegion(
@@ -109,6 +110,7 @@ function PulseRing({
 export default function UserLocationMarker({
   lat,
   lon,
+  showDbConnection = false,
 }: UserLocationMarkerProps) {
   const dotRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
@@ -142,8 +144,8 @@ export default function UserLocationMarker({
   const normal = useMemo(() => position.clone().normalize(), [position]);
 
   const nearest = useMemo(
-    () => findNearestRegion(lat, lon, hasDatabase ? activeRegions : regions),
-    [lat, lon, hasDatabase, activeRegions]
+    () => findNearestRegion(lat, lon, showDbConnection && hasDatabase ? activeRegions : regions),
+    [lat, lon, showDbConnection, hasDatabase, activeRegions]
   );
 
   const latency = useMemo(() => {
@@ -195,8 +197,8 @@ export default function UserLocationMarker({
         </group>
       ))}
 
-      {/* Arc to nearest active region (only when database configured) */}
-      {arcPoints && (
+      {/* Arc to nearest active region (only when database configured and page opts in) */}
+      {showDbConnection && arcPoints && (
         <Line
           points={arcPoints}
           color={SKY_COLOR}
@@ -206,8 +208,8 @@ export default function UserLocationMarker({
         />
       )}
 
-      {/* Persistent latency badge — only when a database is configured */}
-      {hasDatabase && nearest && latency !== null && (
+      {/* Persistent latency badge — only when a database is configured and page opts in */}
+      {showDbConnection && hasDatabase && nearest && latency !== null && (
         <Html
           position={labelPos}
           center

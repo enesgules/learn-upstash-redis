@@ -177,3 +177,34 @@ export function playReplicaArriveSound() {
   osc.start(c.currentTime);
   osc.stop(c.currentTime + 0.12);
 }
+
+/** Two-tone chime — response data arrived back at client */
+export function playResponseSound() {
+  if (isMuted()) return;
+  const c = getCtx();
+
+  // First note (high)
+  const osc1 = c.createOscillator();
+  const gain1 = c.createGain();
+  osc1.connect(gain1);
+  gain1.connect(c.destination);
+  osc1.type = "sine";
+  osc1.frequency.setValueAtTime(660, c.currentTime);
+  gain1.gain.setValueAtTime(0.1, c.currentTime);
+  gain1.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.15);
+  osc1.start(c.currentTime);
+  osc1.stop(c.currentTime + 0.15);
+
+  // Second note (higher, slightly delayed)
+  const osc2 = c.createOscillator();
+  const gain2 = c.createGain();
+  osc2.connect(gain2);
+  gain2.connect(c.destination);
+  osc2.type = "sine";
+  osc2.frequency.setValueAtTime(880, c.currentTime + 0.08);
+  gain2.gain.setValueAtTime(0, c.currentTime);
+  gain2.gain.setValueAtTime(0.08, c.currentTime + 0.08);
+  gain2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.25);
+  osc2.start(c.currentTime + 0.08);
+  osc2.stop(c.currentTime + 0.25);
+}
