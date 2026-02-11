@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDatabaseStore } from "@/lib/store/database-store";
 import { regions, getRegionById, type Region } from "@/lib/regions";
 import { estimateLatencyBetweenRegions } from "@/lib/simulation/latency";
+import { playSelectSound, playDeselectSound, playConnectionSound } from "@/lib/sounds";
 
 interface ContinentGroup {
   name: string;
@@ -216,7 +217,17 @@ export default function RegionBuilder() {
                     region={region}
                     role={getRole(region.id)}
                     latency={getLatency(region.id)}
-                    onToggle={() => toggleRegion(region.id)}
+                    onToggle={() => {
+                      const role = getRole(region.id);
+                      if (role !== "available") {
+                        playDeselectSound();
+                      } else if (!primaryRegion) {
+                        playSelectSound();
+                      } else {
+                        playConnectionSound();
+                      }
+                      toggleRegion(region.id);
+                    }}
                     onHover={(h) => setHoveredRegion(h ? region.id : null)}
                   />
                 ))}

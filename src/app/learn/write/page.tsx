@@ -12,6 +12,7 @@ import LoadingScreen from "@/components/ui/LoadingScreen";
 import { useDatabaseStore } from "@/lib/store/database-store";
 import { useWriteFlowStore } from "@/lib/store/write-flow-store";
 import type { Region } from "@/lib/regions";
+import { playSelectSound } from "@/lib/sounds";
 
 export default function WritePage() {
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
@@ -43,11 +44,13 @@ export default function WritePage() {
 
   // Clicking globe surface sets client location
   const handleGlobeClick = useCallback((lat: number, lon: number) => {
+    playSelectSound();
     useWriteFlowStore.getState().setClientLocation(lat, lon);
   }, []);
 
   // Clicking a region marker also sets client location there
   const handleRegionClick = useCallback((region: Region) => {
+    playSelectSound();
     useWriteFlowStore.getState().setClientLocation(region.lat, region.lon);
   }, []);
 

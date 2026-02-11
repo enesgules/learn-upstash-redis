@@ -13,6 +13,7 @@ import { GLOBE_RADIUS } from "./Globe";
 import ClientMarker from "./ClientMarker";
 import DataPacket from "./DataPacket";
 import PrimaryFlash from "./PrimaryFlash";
+import { playAckSound, playReplicateSound, playReplicaArriveSound } from "@/lib/sounds";
 
 // Scale factor: real latency (ms) * ANIMATION_SPEED = animation duration (s)
 // 200ms * 0.003 = 0.6s animation
@@ -120,11 +121,13 @@ export default function WriteFlowVisualization() {
       store.setPrimaryProgress(newProgress);
 
       if (newProgress >= 1) {
+        playAckSound();
         store.onPrimaryAck();
         // Transition to replicating after a brief pause for the flash
         ackTimeoutRef.current = setTimeout(() => {
           const s = useWriteFlowStore.getState();
           if (s.phase === "primary-ack") {
+            playReplicateSound();
             s.setPhase("replicating");
             s.addEvent({
               time: s.primaryLatencyMs,
@@ -151,6 +154,7 @@ export default function WriteFlowVisualization() {
         );
         store.setReplicaProgress(replica.regionId, newProgress);
         if (newProgress >= 1 && !replica.arrived) {
+          playReplicaArriveSound();
           store.onReplicaArrive(replica.regionId);
         }
       }

@@ -9,6 +9,7 @@ import {
   estimateLatency,
   estimateLatencyBetweenRegions,
 } from "@/lib/simulation/latency";
+import { playPacketSendSound } from "@/lib/sounds";
 
 function InsightInline() {
   const primaryLatencyMs = useWriteFlowStore((s) => s.primaryLatencyMs);
@@ -87,6 +88,7 @@ export default function WritePanel() {
       })
       .filter((r) => r !== null);
 
+    playPacketSendSound();
     useWriteFlowStore.getState().startAnimation(primaryLatency, replicas);
   }, [clientLocation, primary, primaryRegion, readRegions]);
 

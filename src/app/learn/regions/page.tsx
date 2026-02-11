@@ -11,6 +11,7 @@ import LearningPathNav from "@/components/ui/LearningPathNav";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { useDatabaseStore } from "@/lib/store/database-store";
 import type { Region } from "@/lib/regions";
+import { playSelectSound, playDeselectSound, playConnectionSound } from "@/lib/sounds";
 
 export default function RegionsPage() {
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
@@ -32,9 +33,16 @@ export default function RegionsPage() {
 
   const handleRegionClick = useCallback(
     (region: Region) => {
+      if (region.id === primaryRegion || readRegions.includes(region.id)) {
+        playDeselectSound();
+      } else if (!primaryRegion) {
+        playSelectSound();
+      } else {
+        playConnectionSound();
+      }
       toggleRegion(region.id);
     },
-    [toggleRegion]
+    [toggleRegion, primaryRegion, readRegions]
   );
 
   return (

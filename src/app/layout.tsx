@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NextStepButton from "@/components/ui/NextStepButton";
+import SoundToggle from "@/components/ui/SoundToggle";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
       >
         {children}
         <NextStepButton />
+        <SoundToggle />
       </body>
     </html>
   );
