@@ -23,6 +23,23 @@ export function latLonToVector3(
 }
 
 /**
+ * Convert a Three.js Vector3 on a sphere surface back to latitude/longitude.
+ * Inverse of latLonToVector3.
+ */
+export function vector3ToLatLon(point: THREE.Vector3): {
+  lat: number;
+  lon: number;
+} {
+  const n = point.clone().normalize();
+  const lat = 90 - Math.acos(Math.max(-1, Math.min(1, n.y))) / DEG_TO_RAD;
+  const theta = Math.atan2(n.z, -n.x);
+  let lon = theta / DEG_TO_RAD - 180;
+  if (lon < -180) lon += 360;
+  if (lon > 180) lon -= 360;
+  return { lat, lon };
+}
+
+/**
  * Calculate the great-circle distance between two lat/lon points using the Haversine formula.
  * Returns distance in kilometers.
  */

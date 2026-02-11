@@ -1,15 +1,16 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useMemo, type ReactNode } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Suspense, useEffect, useRef, useMemo, useCallback, type ReactNode } from "react";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import Globe from "./Globe";
 import RegionMarker from "./RegionMarker";
 import UserLocationMarker from "./UserLocationMarker";
 import { regions, groupRegionsByLocation, getRegionById, type Region } from "@/lib/regions";
-import { latLonToVector3 } from "@/lib/geo-utils";
+import { latLonToVector3, vector3ToLatLon } from "@/lib/geo-utils";
 import { useDatabaseStore } from "@/lib/store/database-store";
+import { GLOBE_RADIUS } from "./Globe";
 import { useGeolocation } from "@/lib/hooks/use-geolocation";
 
 function ReadySignal({ onReady }: { onReady?: () => void }) {
@@ -67,6 +68,7 @@ function CameraController({
 interface GlobeSceneProps {
   children?: ReactNode;
   onRegionClick?: (region: Region) => void;
+  onGlobeClick?: (lat: number, lon: number) => void;
   selectedRegions?: string[];
   primaryRegion?: string | null;
   onReady?: () => void;
@@ -75,6 +77,7 @@ interface GlobeSceneProps {
 export default function GlobeScene({
   children,
   onRegionClick,
+  onGlobeClick,
   selectedRegions = [],
   primaryRegion = null,
   onReady,
@@ -119,6 +122,21 @@ export default function GlobeScene({
 
         {/* Globe */}
         <Globe />
+
+        {/* Invisible click target for arbitrary globe clicks */}
+        {onGlobeClick && (
+          <mesh
+            visible={false}
+            onClick={(e: ThreeEvent<MouseEvent>) => {
+              e.stopPropagation();
+              const { lat, lon } = vector3ToLatLon(e.point);
+              onGlobeClick(lat, lon);
+            }}
+          >
+            <sphereGeometry args={[GLOBE_RADIUS, 64, 64]} />
+            <meshBasicMaterial />
+          </mesh>
+        )}
 
         {/* Region markers (grouped by location) */}
         {regionGroups.map((group) => (

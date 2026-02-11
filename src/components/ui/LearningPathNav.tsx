@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 const experiences = [
   { shortTitle: "Globe", description: "Explore regions", href: "/" },
   { shortTitle: "Regions", description: "Build database", href: "/learn/regions" },
-  { shortTitle: "Write", description: "Replicate data", href: null },
+  { shortTitle: "Write", description: "Replicate data", href: "/learn/write" },
   { shortTitle: "Read", description: "Nearest routing", href: null },
   { shortTitle: "Consistency", description: "Stale reads", href: null },
   { shortTitle: "Failover", description: "Leader election", href: null },

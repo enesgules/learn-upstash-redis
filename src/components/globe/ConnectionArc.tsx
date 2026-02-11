@@ -13,7 +13,7 @@ const ARC_SEGMENTS = 64;
  * Build an array of points along a great-circle arc between two lat/lon
  * positions, elevated above the globe surface with a smooth parabolic peak.
  */
-function buildGreatCircleArc(
+export function buildGreatCircleArc(
   startLat: number,
   startLon: number,
   endLat: number,
