@@ -90,11 +90,6 @@ export default function WelcomeOverlay({
             transition={{ duration: 0.5, delay: 0.15 }}
             className="mx-4 flex max-w-lg flex-col items-center text-center"
           >
-            {/* Brand */}
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-500/60">
-              upstash
-            </span>
-
             {/* Title */}
             <h2 className="mt-6 text-3xl font-bold tracking-tight sm:text-4xl">
               <span className="text-zinc-50">Welcome to</span>

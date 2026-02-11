@@ -10,11 +10,7 @@ export default function LoadingScreen() {
       transition={{ duration: 0.6, ease: "easeInOut" }}
       className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0a0a0a]"
     >
-      <span className="font-mono text-xs font-bold uppercase tracking-[0.3em] text-emerald-500/70">
-        upstash
-      </span>
-
-      <p className="mt-4 font-mono text-sm text-zinc-600">
+      <p className="font-mono text-sm text-zinc-600">
         Loading the globe...
       </p>
 

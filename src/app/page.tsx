@@ -49,9 +49,7 @@ export default function Home() {
 
       {/* Top: Brand + Subtitle (stays) */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col items-center pt-10">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-500/60">
-          upstash
-        </span>
+        <img src="/upstash-dark-bg.png" alt="Upstash" className="h-6" />
 
         <span className="mt-4 text-sm font-medium uppercase tracking-widest text-emerald-400">
           Interactive Guide
@@ -79,7 +77,7 @@ export default function Home() {
 
       {/* Bottom: Learning path nav + hint */}
       <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-3 pb-6">
-        <LearningPathNav />
+        <LearningPathNav activeStep={0} />
         <p className="text-xs text-zinc-600">
           Drag to rotate &middot; Scroll to zoom &middot; Hover regions to
           explore
