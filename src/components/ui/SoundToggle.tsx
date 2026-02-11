@@ -15,8 +15,10 @@ export default function SoundToggle() {
     audio.preload = "none";
     audioRef.current = audio;
 
-    // If user previously enabled sound, we still wait for a click
-    // (browser autoplay policy), but we'll remember the preference.
+    // Always start muted — browser can't autoplay anyway, and this
+    // keeps SFX in sync with the toggle's visual state.
+    localStorage.setItem(STORAGE_KEY, "false");
+
     return () => {
       audio.pause();
       audio.src = "";
