@@ -6,7 +6,6 @@ import { useDatabaseStore } from "@/lib/store/database-store";
 import { useFailoverStore } from "@/lib/store/failover-store";
 import { getRegionById } from "@/lib/regions";
 import { estimateLatencyBetweenRegions } from "@/lib/simulation/latency";
-import { playFailureAlarmSound } from "@/lib/sounds";
 
 const PHASE_NARRATION: Record<string, (ctx: { failedCity: string; winnerCity: string; queueCount: number }) => string> = {
   failure: ({ failedCity }) => `Primary in ${failedCity} has crashed. Incoming writes will queue...`,
@@ -24,7 +23,7 @@ export default function FailoverPanel() {
   const failedRegionId = useFailoverStore((s) => s.failedRegionId);
   const newPrimaryId = useFailoverStore((s) => s.newPrimaryId);
   const downtimeMs = useFailoverStore((s) => s.downtimeMs);
-  const events = useFailoverStore((s) => s.events);
+  const queuedRequests = useFailoverStore((s) => s.queuedRequests);
   const killPrimary = useFailoverStore((s) => s.killPrimary);
   const reset = useFailoverStore((s) => s.reset);
 
@@ -50,7 +49,7 @@ export default function FailoverPanel() {
       ? PHASE_NARRATION[phase]?.({
           failedCity: failedRegion?.city ?? "unknown",
           winnerCity: newPrimary?.city ?? "unknown",
-          queueCount: 3,
+          queueCount: queuedRequests.length,
         })
       : null;
 

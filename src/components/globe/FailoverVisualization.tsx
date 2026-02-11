@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Line, Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -229,9 +229,6 @@ function RecoveryArcs({
 }
 
 export default function FailoverVisualization() {
-  const primaryRegion = useDatabaseStore((s) => s.primaryRegion);
-  const readRegions = useDatabaseStore((s) => s.readRegions);
-
   const phase = useFailoverStore((s) => s.phase);
   const failedRegionId = useFailoverStore((s) => s.failedRegionId);
   const newPrimaryId = useFailoverStore((s) => s.newPrimaryId);
@@ -250,10 +247,21 @@ export default function FailoverVisualization() {
   const phaseTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
   const soundPlayedRef = useRef<Record<string, boolean>>({});
 
+  // Reset sound flags when phase returns to idle (after reset)
+  useEffect(() => {
+    if (phase === "idle") {
+      soundPlayedRef.current = {};
+    }
+  }, [phase]);
+
   // Cleanup timeouts on unmount
-  useFrame(() => {
-    // no-op needed for the frame-based state below
-  });
+  useEffect(() => {
+    const timeouts = phaseTimeoutsRef.current;
+    return () => {
+      for (const t of timeouts) clearTimeout(t);
+      timeouts.clear();
+    };
+  }, []);
 
   // Main animation loop
   useFrame((_, delta) => {
@@ -276,6 +284,16 @@ export default function FailoverVisualization() {
           time: 0,
           label: "Failure detected by health checks",
           type: "detect",
+        });
+        store.addEvent({
+          time: 0,
+          label: `${store.queuedRequests.length} write requests queued`,
+          type: "failure",
+        });
+        store.addEvent({
+          time: 0,
+          label: "Read replicas still serving reads",
+          type: "resume",
         });
       }
     }
@@ -333,6 +351,11 @@ export default function FailoverVisualization() {
             s.addEvent({
               time: s.detectionTimeMs + s.electionTimeMs,
               label: "Connections re-establishing",
+              type: "reconnect",
+            });
+            s.addEvent({
+              time: s.detectionTimeMs + s.electionTimeMs,
+              label: "Queued writes draining to new primary",
               type: "reconnect",
             });
           }

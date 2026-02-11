@@ -24,10 +24,12 @@ export interface QueuedRequest {
   clientLon: number;
 }
 
+export type FailoverEventType = "failure" | "detect" | "election" | "elected" | "reconnect" | "resume";
+
 export interface FailoverEvent {
   time: number;
   label: string;
-  type: "failure" | "detect" | "election" | "elected" | "reconnect" | "resume";
+  type: FailoverEventType;
 }
 
 interface FailoverState {
@@ -116,12 +118,14 @@ export const useFailoverStore = create<FailoverState>((set, get) => ({
       }
     }
 
-    // Build election votes (each candidate sends pulse to winner)
-    const votes: ElectionVote[] = readRegions.map((id) => ({
-      fromRegionId: id,
-      toRegionId: bestId,
-      progress: 0,
-    }));
+    // Build election votes (each candidate sends pulse to winner, skip self-vote)
+    const votes: ElectionVote[] = readRegions
+      .filter((id) => id !== bestId)
+      .map((id) => ({
+        fromRegionId: id,
+        toRegionId: bestId,
+        progress: 0,
+      }));
 
     // Generate queued requests at client locations (cities without Upstash regions)
     const requests: QueuedRequest[] = [

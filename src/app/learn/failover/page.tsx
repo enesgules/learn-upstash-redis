@@ -24,6 +24,11 @@ export default function FailoverPage() {
   const phase = useFailoverStore((s) => s.phase);
   const newPrimaryId = useFailoverStore((s) => s.newPrimaryId);
 
+  // Reset failover state on mount (clean slate if returning mid-animation)
+  useEffect(() => {
+    useFailoverStore.getState().reset();
+  }, []);
+
   // Default region setup with extra replicas for meaningful failover
   useEffect(() => {
     const { primaryRegion, setPrimary, addReadRegion } =
@@ -107,7 +112,11 @@ export default function FailoverPage() {
       <div className="absolute right-0 bottom-0 left-[380px] z-20 flex flex-col items-center gap-3 pb-6">
         <LearningPathNav activeStep={5} />
         <p className="text-xs text-zinc-600">
-          Kill the primary to see automatic failover in action
+          {phase === "idle"
+            ? "Kill the primary to see automatic failover in action"
+            : phase === "complete"
+              ? "Failover complete — reset to try again"
+              : "Failover in progress..."}
         </p>
       </div>
 
