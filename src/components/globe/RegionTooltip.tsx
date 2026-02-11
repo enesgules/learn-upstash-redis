@@ -14,7 +14,6 @@ export default function RegionTooltip({ regions }: RegionTooltipProps) {
     <Html
       center
       distanceFactor={5}
-      occlude
       zIndexRange={[1, 0]}
       style={{ pointerEvents: "none", transform: "translateY(-24px)" }}
     >

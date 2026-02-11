@@ -50,7 +50,7 @@ const ZONES = [
 ];
 
 const ZONE_COUNT = ZONES.length;
-const ARC_SEGMENTS = 20;
+const ARC_SEGMENTS = 48;
 
 function latencyColor(ms: number): string {
   if (ms <= 15) return "#10b981"; // emerald — same region

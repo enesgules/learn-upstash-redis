@@ -11,7 +11,8 @@ const experiences = [
   },
   {
     title: "Build Your Database",
-    description: "Choose a primary region and add read replicas",
+    description:
+      "Set a primary region, add read replicas, and see latency heatmaps form across the globe",
   },
   {
     title: "Write Flow",
