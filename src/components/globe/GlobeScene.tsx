@@ -26,15 +26,20 @@ function ReadySignal({ onReady }: { onReady?: () => void }) {
  */
 function CameraController({
   controlsRef,
+  cameraTarget,
 }: {
   controlsRef: React.RefObject<InstanceType<typeof import("three-stdlib").OrbitControls> | null>;
+  cameraTarget?: { lat: number; lon: number } | null;
 }) {
   const hoveredRegionId = useDatabaseStore((s) => s.hoveredRegionId);
   const { camera } = useThree();
   const targetDir = useRef<THREE.Vector3 | null>(null);
 
   useEffect(() => {
-    if (hoveredRegionId) {
+    // cameraTarget prop takes priority over hovered region
+    if (cameraTarget) {
+      targetDir.current = latLonToVector3(cameraTarget.lat, cameraTarget.lon, 1);
+    } else if (hoveredRegionId) {
       const region = getRegionById(hoveredRegionId);
       if (region) {
         targetDir.current = latLonToVector3(region.lat, region.lon, 1);
@@ -42,7 +47,7 @@ function CameraController({
     } else {
       targetDir.current = null;
     }
-  }, [hoveredRegionId]);
+  }, [cameraTarget, hoveredRegionId]);
 
   useFrame(() => {
     const controls = controlsRef.current;
@@ -80,6 +85,7 @@ interface GlobeSceneProps {
   hideUserLocation?: boolean;
   showUserDbConnection?: boolean;
   regionNavigationHint?: NavigationHint;
+  cameraTarget?: { lat: number; lon: number } | null;
 }
 
 export default function GlobeScene({
@@ -92,6 +98,7 @@ export default function GlobeScene({
   hideUserLocation = false,
   showUserDbConnection = false,
   regionNavigationHint,
+  cameraTarget,
 }: GlobeSceneProps) {
   const storePrimary = useDatabaseStore((s) => s.primaryRegion);
   // Only filter by provider when the page explicitly passes primaryRegion
@@ -115,7 +122,7 @@ export default function GlobeScene({
     >
       <Suspense fallback={null}>
         <ReadySignal onReady={onReady} />
-        <CameraController controlsRef={controlsRef} />
+        <CameraController controlsRef={controlsRef} cameraTarget={cameraTarget} />
 
         {/* Lighting */}
         <ambientLight intensity={0.3} />

@@ -228,3 +228,74 @@ export function playStaleSound() {
   osc.start(c.currentTime);
   osc.stop(c.currentTime + 0.3);
 }
+
+/** Harsh descending alarm — primary failure */
+export function playFailureAlarmSound() {
+  if (isMuted()) return;
+  const c = getCtx();
+
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.connect(gain);
+  gain.connect(c.destination);
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(600, c.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(150, c.currentTime + 0.4);
+  gain.gain.setValueAtTime(0.08, c.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.5);
+  osc.start(c.currentTime);
+  osc.stop(c.currentTime + 0.5);
+
+  const osc2 = c.createOscillator();
+  const gain2 = c.createGain();
+  osc2.connect(gain2);
+  gain2.connect(c.destination);
+  osc2.type = "sine";
+  osc2.frequency.setValueAtTime(80, c.currentTime);
+  osc2.frequency.exponentialRampToValueAtTime(40, c.currentTime + 0.3);
+  gain2.gain.setValueAtTime(0.15, c.currentTime);
+  gain2.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.35);
+  osc2.start(c.currentTime);
+  osc2.stop(c.currentTime + 0.35);
+}
+
+/** Rapid pulsing beeps — election voting */
+export function playElectionPulseSound() {
+  if (isMuted()) return;
+  const c = getCtx();
+
+  for (let i = 0; i < 3; i++) {
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.connect(gain);
+    gain.connect(c.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(300 + i * 80, c.currentTime + i * 0.12);
+    gain.gain.setValueAtTime(0, c.currentTime);
+    gain.gain.setValueAtTime(0.08, c.currentTime + i * 0.12);
+    gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i * 0.12 + 0.1);
+    osc.start(c.currentTime + i * 0.12);
+    osc.stop(c.currentTime + i * 0.12 + 0.1);
+  }
+}
+
+/** Rising major resolution — new leader elected / recovery */
+export function playRecoveryChimeSound() {
+  if (isMuted()) return;
+  const c = getCtx();
+
+  const notes = [440, 554, 659];
+  notes.forEach((freq, i) => {
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.connect(gain);
+    gain.connect(c.destination);
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, c.currentTime + i * 0.1);
+    gain.gain.setValueAtTime(0, c.currentTime);
+    gain.gain.setValueAtTime(0.07, c.currentTime + i * 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + i * 0.1 + 0.3);
+    osc.start(c.currentTime + i * 0.1);
+    osc.stop(c.currentTime + i * 0.1 + 0.3);
+  });
+}

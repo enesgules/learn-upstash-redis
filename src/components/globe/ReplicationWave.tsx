@@ -12,12 +12,14 @@ interface ReplicationWaveProps {
   lat: number;
   lon: number;
   progress: number; // 0-1
+  color?: string;
 }
 
 export default function ReplicationWave({
   lat,
   lon,
   progress,
+  color = "#10b981",
 }: ReplicationWaveProps) {
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -58,7 +60,7 @@ export default function ReplicationWave({
     <mesh ref={meshRef} position={position} quaternion={quaternion}>
       <ringGeometry args={[0, 0.01, 64]} />
       <meshBasicMaterial
-        color="#10b981"
+        color={color}
         transparent
         opacity={0.5}
         side={THREE.DoubleSide}
