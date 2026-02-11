@@ -3,7 +3,7 @@
 import { Suspense, useMemo, type ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
-import Globe, { type GlobeTextureId, type GlobeTint } from "./Globe";
+import Globe from "./Globe";
 import RegionMarker from "./RegionMarker";
 import { groupRegionsByLocation, type Region } from "@/lib/regions";
 
@@ -12,8 +12,6 @@ interface GlobeSceneProps {
   onRegionClick?: (region: Region) => void;
   selectedRegions?: string[];
   primaryRegion?: string | null;
-  textureId?: GlobeTextureId;
-  tint?: GlobeTint | null;
 }
 
 export default function GlobeScene({
@@ -21,8 +19,6 @@ export default function GlobeScene({
   onRegionClick,
   selectedRegions = [],
   primaryRegion = null,
-  textureId = "water-4k",
-  tint = null,
 }: GlobeSceneProps) {
   const regionGroups = useMemo(() => groupRegionsByLocation(), []);
 
@@ -51,7 +47,7 @@ export default function GlobeScene({
         />
 
         {/* Globe */}
-        <Globe textureId={textureId} tint={tint} />
+        <Globe />
 
         {/* Region markers (grouped by location) */}
         {regionGroups.map((group) => (
@@ -79,7 +75,7 @@ export default function GlobeScene({
           minDistance={3.5}
           maxDistance={10}
           autoRotate
-          autoRotateSpeed={0.3}
+          autoRotateSpeed={0.1}
           rotateSpeed={0.5}
         />
       </Suspense>

@@ -17,8 +17,8 @@ interface RegionMarkerProps {
   onClick?: (region: Region) => void;
 }
 
-const MARKER_RADIUS = 0.015;
-const MARKER_ELEVATION = 0.015;
+const MARKER_RADIUS = 0.022;
+const MARKER_ELEVATION = 0.02;
 
 export default function RegionMarker({
   regions,
@@ -29,6 +29,8 @@ export default function RegionMarker({
   onClick,
 }: RegionMarkerProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const glowRef =
+    useRef<THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>>(null);
   const [hovered, setHovered] = useState(false);
 
   const position = latLonToVector3(
@@ -54,14 +56,22 @@ export default function RegionMarker({
   useFrame((state) => {
     if (!meshRef.current) return;
     const pulse = Math.sin(state.clock.elapsedTime * 2 + lat) * 0.15 + 1;
-    const scale = hovered ? 1.6 : isSelected || isPrimary ? 1.3 : pulse;
+    const scale = hovered ? 1.8 : isSelected || isPrimary ? 1.4 : pulse;
     meshRef.current.scale.setScalar(scale);
+
+    if (glowRef.current) {
+      const glowScale = hovered ? 2.8 : pulse * 1.8;
+      glowRef.current.scale.setScalar(glowScale);
+      glowRef.current.material.opacity = hovered ? 0.4 : 0.2;
+    }
   });
 
-  const color = isPrimary ? "#facc15" : "#10b981";
+  const color = isPrimary ? "#facc15" : "#f0f0f0";
+  const glowColor = isPrimary ? "#facc15" : "#10b981";
 
   return (
     <group position={position}>
+      {/* Core dot — bright white so it's visible on both day and night */}
       <mesh
         ref={meshRef}
         onPointerOver={handlePointerOver}
@@ -70,6 +80,12 @@ export default function RegionMarker({
       >
         <sphereGeometry args={[MARKER_RADIUS, 16, 16]} />
         <meshBasicMaterial color={color} />
+      </mesh>
+
+      {/* Emerald glow around the dot */}
+      <mesh ref={glowRef}>
+        <sphereGeometry args={[MARKER_RADIUS, 16, 16]} />
+        <meshBasicMaterial color={glowColor} transparent opacity={0.2} />
       </mesh>
 
       {hovered && <RegionTooltip regions={regions} />}
