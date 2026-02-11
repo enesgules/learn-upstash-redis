@@ -37,7 +37,10 @@ export default function Home() {
     <div className="relative h-screen w-screen overflow-hidden bg-[#0a0a0a]">
       {/* 3D Globe (always rendered, loads in background) */}
       <div className="absolute inset-0">
-        <GlobeScene onReady={handleGlobeReady} />
+        <GlobeScene
+          onReady={handleGlobeReady}
+          regionNavigationHint={{ text: "Start building your database", href: "/learn/regions" }}
+        />
       </div>
 
       {/* Top gradient for readability */}

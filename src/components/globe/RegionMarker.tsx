@@ -9,6 +9,11 @@ import { GLOBE_RADIUS } from "./Globe";
 import { useDatabaseStore } from "@/lib/store/database-store";
 import RegionTooltip from "./RegionTooltip";
 
+interface NavigationHint {
+  text: string;
+  href: string;
+}
+
 interface RegionMarkerProps {
   regions: Region[];
   lat: number;
@@ -16,6 +21,9 @@ interface RegionMarkerProps {
   isSelected?: boolean;
   isPrimary?: boolean;
   onClick?: (region: Region) => void;
+  navigationHint?: NavigationHint;
+  isHintActive?: boolean;
+  onHintClick?: () => void;
 }
 
 const MARKER_RADIUS = 0.032;
@@ -28,6 +36,9 @@ export default function RegionMarker({
   isSelected = false,
   isPrimary = false,
   onClick,
+  navigationHint,
+  isHintActive = false,
+  onHintClick,
 }: RegionMarkerProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const glowRef =
@@ -35,7 +46,7 @@ export default function RegionMarker({
   const [hovered, setHovered] = useState(false);
   const hoveredRegionId = useDatabaseStore((s) => s.hoveredRegionId);
   const panelHovered = hoveredRegionId !== null && regions.some((r) => r.id === hoveredRegionId);
-  const showTooltip = hovered || panelHovered;
+  const showTooltip = hovered || panelHovered || isHintActive;
 
   const position = latLonToVector3(
     lat,
@@ -54,8 +65,11 @@ export default function RegionMarker({
   }, []);
 
   const handleClick = useCallback(() => {
+    if (navigationHint && onHintClick) {
+      onHintClick();
+    }
     onClick?.(regions[0]);
-  }, [onClick, regions]);
+  }, [onClick, regions, navigationHint, onHintClick]);
 
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -93,7 +107,7 @@ export default function RegionMarker({
         <meshBasicMaterial color={glowColor} transparent opacity={0.2} />
       </mesh>
 
-      {showTooltip && <RegionTooltip regions={regions} />}
+      {showTooltip && <RegionTooltip regions={regions} navigationHint={isHintActive ? navigationHint : undefined} />}
     </group>
   );
 }

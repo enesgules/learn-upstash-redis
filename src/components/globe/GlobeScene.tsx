@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useMemo, useCallback, type ReactNode } from "react";
+import { Suspense, useEffect, useRef, useMemo, useState, useCallback, type ReactNode } from "react";
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
@@ -65,6 +65,11 @@ function CameraController({
   return null;
 }
 
+interface NavigationHint {
+  text: string;
+  href: string;
+}
+
 interface GlobeSceneProps {
   children?: ReactNode;
   onRegionClick?: (region: Region) => void;
@@ -74,6 +79,7 @@ interface GlobeSceneProps {
   onReady?: () => void;
   hideUserLocation?: boolean;
   showUserDbConnection?: boolean;
+  regionNavigationHint?: NavigationHint;
 }
 
 export default function GlobeScene({
@@ -85,6 +91,7 @@ export default function GlobeScene({
   onReady,
   hideUserLocation = false,
   showUserDbConnection = false,
+  regionNavigationHint,
 }: GlobeSceneProps) {
   const storePrimary = useDatabaseStore((s) => s.primaryRegion);
   // Only filter by provider when the page explicitly passes primaryRegion
@@ -97,6 +104,7 @@ export default function GlobeScene({
   }, [activeProvider]);
   const controlsRef = useRef<InstanceType<typeof import("three-stdlib").OrbitControls> | null>(null);
   const userLocation = useGeolocation();
+  const [activeHintKey, setActiveHintKey] = useState<string | null>(null);
 
   return (
     <Canvas
@@ -128,14 +136,17 @@ export default function GlobeScene({
         {/* Globe */}
         <Globe />
 
-        {/* Invisible click target for arbitrary globe clicks */}
-        {onGlobeClick && (
+        {/* Invisible click target for arbitrary globe clicks + hint dismissal */}
+        {(onGlobeClick || regionNavigationHint) && (
           <mesh
             visible={false}
             onClick={(e: ThreeEvent<MouseEvent>) => {
               e.stopPropagation();
-              const { lat, lon } = vector3ToLatLon(e.point);
-              onGlobeClick(lat, lon);
+              if (regionNavigationHint) setActiveHintKey(null);
+              if (onGlobeClick) {
+                const { lat, lon } = vector3ToLatLon(e.point);
+                onGlobeClick(lat, lon);
+              }
             }}
           >
             <sphereGeometry args={[GLOBE_RADIUS, 64, 64]} />
@@ -155,6 +166,9 @@ export default function GlobeScene({
             )}
             isPrimary={group.regions.some((r) => r.id === primaryRegion)}
             onClick={onRegionClick}
+            navigationHint={regionNavigationHint}
+            isHintActive={activeHintKey === group.key}
+            onHintClick={() => setActiveHintKey((prev) => prev === group.key ? null : group.key)}
           />
         ))}
 

@@ -3,11 +3,17 @@
 import { Html } from "@react-three/drei";
 import type { Region } from "@/lib/regions";
 
-interface RegionTooltipProps {
-  regions: Region[];
+interface NavigationHint {
+  text: string;
+  href: string;
 }
 
-export default function RegionTooltip({ regions }: RegionTooltipProps) {
+interface RegionTooltipProps {
+  regions: Region[];
+  navigationHint?: NavigationHint;
+}
+
+export default function RegionTooltip({ regions, navigationHint }: RegionTooltipProps) {
   const city = regions[0].city;
 
   return (
@@ -44,6 +50,16 @@ export default function RegionTooltip({ regions }: RegionTooltipProps) {
             </div>
           ))}
         </div>
+        {navigationHint && (
+          <a
+            href={navigationHint.href}
+            style={{ pointerEvents: "auto" }}
+            className="mt-2 flex items-center gap-1 border-t border-emerald-500/20 pt-2 text-[11px] font-medium text-emerald-400 transition-colors hover:text-emerald-300"
+          >
+            {navigationHint.text}
+            <span aria-hidden>&#8594;</span>
+          </a>
+        )}
       </div>
     </Html>
   );
