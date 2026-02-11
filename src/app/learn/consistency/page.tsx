@@ -13,6 +13,7 @@ import { useConsistencyRaceStore } from "@/lib/store/consistency-race-store";
 import { useGeolocation } from "@/lib/hooks/use-geolocation";
 import { getRegionById, type Region } from "@/lib/regions";
 import { estimateLatencyStable } from "@/lib/simulation/latency";
+import { playSelectSound } from "@/lib/sounds";
 
 export default function ConsistencyPage() {
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
@@ -82,10 +83,12 @@ export default function ConsistencyPage() {
   }, []);
 
   const handleGlobeClick = useCallback((lat: number, lon: number) => {
+    playSelectSound();
     useConsistencyRaceStore.getState().setClientLocation(lat, lon);
   }, []);
 
   const handleRegionClick = useCallback((region: Region) => {
+    playSelectSound();
     useConsistencyRaceStore
       .getState()
       .setClientLocation(region.lat, region.lon);

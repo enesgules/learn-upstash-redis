@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
+import { useOnboardingStore } from "@/lib/store/onboarding-store";
 
 const STORAGE_KEY = "sound-enabled";
 const TOOLTIP_SEEN_KEY = "sound-tooltip-seen";
@@ -9,6 +10,7 @@ export default function SoundToggle() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const hasSeenWelcome = useOnboardingStore((s) => s.hasSeenWelcome);
 
   useEffect(() => {
     const audio = new Audio("/audio/cosmic-ambient.mp3");
@@ -26,26 +28,27 @@ export default function SoundToggle() {
       });
     }
 
-    // Show tooltip once on first ever visit, after a short delay
-    if (!localStorage.getItem(TOOLTIP_SEEN_KEY)) {
-      const showTimer = setTimeout(() => setShowTooltip(true), 2000);
-      const hideTimer = setTimeout(() => {
-        setShowTooltip(false);
-        localStorage.setItem(TOOLTIP_SEEN_KEY, "true");
-      }, 6000);
-      return () => {
-        clearTimeout(showTimer);
-        clearTimeout(hideTimer);
-        audio.pause();
-        audio.src = "";
-      };
-    }
-
     return () => {
       audio.pause();
       audio.src = "";
     };
   }, []);
+
+  // Show tooltip once after welcome overlay is dismissed
+  useEffect(() => {
+    if (!hasSeenWelcome) return;
+    if (localStorage.getItem(TOOLTIP_SEEN_KEY)) return;
+
+    const showTimer = setTimeout(() => setShowTooltip(true), 2000);
+    const hideTimer = setTimeout(() => {
+      setShowTooltip(false);
+      localStorage.setItem(TOOLTIP_SEEN_KEY, "true");
+    }, 6000);
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [hasSeenWelcome]);
 
   const toggle = useCallback(() => {
     const audio = audioRef.current;

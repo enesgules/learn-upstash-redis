@@ -13,6 +13,7 @@ import LoadingScreen from "@/components/ui/LoadingScreen";
 import { useDatabaseStore } from "@/lib/store/database-store";
 import { useReadFlowStore } from "@/lib/store/read-flow-store";
 import type { Region } from "@/lib/regions";
+import { playSelectSound } from "@/lib/sounds";
 
 export default function ReadPage() {
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
@@ -44,11 +45,13 @@ export default function ReadPage() {
 
   // Clicking globe surface sets client location
   const handleGlobeClick = useCallback((lat: number, lon: number) => {
+    playSelectSound();
     useReadFlowStore.getState().setClientLocation(lat, lon);
   }, []);
 
   // Clicking a region marker also sets client location there
   const handleRegionClick = useCallback((region: Region) => {
+    playSelectSound();
     useReadFlowStore.getState().setClientLocation(region.lat, region.lon);
   }, []);
 
