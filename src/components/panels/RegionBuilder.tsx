@@ -209,7 +209,7 @@ export default function RegionBuilder() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="mx-4 mt-3 overflow-hidden rounded-lg border border-emerald-500/15 bg-emerald-500/5 px-3 py-2"
+            className="mx-4 mt-3 mb-3 overflow-hidden rounded-lg border border-emerald-500/15 bg-emerald-500/5 px-3 py-2"
           >
             <p className="text-[11px] text-zinc-400">
               Pick a primary region close to where most of your users write data.
@@ -222,7 +222,7 @@ export default function RegionBuilder() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="mx-4 mt-3 overflow-hidden rounded-lg border border-emerald-500/15 bg-emerald-500/5 px-3 py-2"
+            className="mx-4 mt-3 mb-3 overflow-hidden rounded-lg border border-emerald-500/15 bg-emerald-500/5 px-3 py-2"
           >
             <p className="text-[11px] text-zinc-400">
               Now add read replicas. Users near a replica get fast reads without

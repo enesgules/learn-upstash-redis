@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Region } from "@/lib/regions";
 import { latLonToVector3 } from "@/lib/geo-utils";
@@ -64,7 +64,8 @@ export default function RegionMarker({
     document.body.style.cursor = "auto";
   }, []);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation();
     if (navigationHint && onHintClick) {
       onHintClick();
     }
