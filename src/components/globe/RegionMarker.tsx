@@ -6,6 +6,7 @@ import * as THREE from "three";
 import type { Region } from "@/lib/regions";
 import { latLonToVector3 } from "@/lib/geo-utils";
 import { GLOBE_RADIUS } from "./Globe";
+import { useDatabaseStore } from "@/lib/store/database-store";
 import RegionTooltip from "./RegionTooltip";
 
 interface RegionMarkerProps {
@@ -32,6 +33,9 @@ export default function RegionMarker({
   const glowRef =
     useRef<THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>>(null);
   const [hovered, setHovered] = useState(false);
+  const hoveredRegionId = useDatabaseStore((s) => s.hoveredRegionId);
+  const panelHovered = hoveredRegionId !== null && regions.some((r) => r.id === hoveredRegionId);
+  const showTooltip = hovered || panelHovered;
 
   const position = latLonToVector3(
     lat,
@@ -56,13 +60,14 @@ export default function RegionMarker({
   useFrame((state) => {
     if (!meshRef.current) return;
     const pulse = Math.sin(state.clock.elapsedTime * 2 + lat) * 0.15 + 1;
-    const scale = hovered ? 1.8 : isSelected || isPrimary ? 1.4 : pulse;
+    const isHighlighted = hovered || panelHovered;
+    const scale = isHighlighted ? 1.8 : isSelected || isPrimary ? 1.4 : pulse;
     meshRef.current.scale.setScalar(scale);
 
     if (glowRef.current) {
-      const glowScale = hovered ? 3.2 : pulse * 2.2;
+      const glowScale = isHighlighted ? 3.2 : pulse * 2.2;
       glowRef.current.scale.setScalar(glowScale);
-      glowRef.current.material.opacity = hovered ? 0.5 : 0.3;
+      glowRef.current.material.opacity = isHighlighted ? 0.5 : 0.3;
     }
   });
 
@@ -88,7 +93,7 @@ export default function RegionMarker({
         <meshBasicMaterial color={glowColor} transparent opacity={0.2} />
       </mesh>
 
-      {hovered && <RegionTooltip regions={regions} />}
+      {showTooltip && <RegionTooltip regions={regions} />}
     </group>
   );
 }

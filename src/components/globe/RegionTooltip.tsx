@@ -14,6 +14,8 @@ export default function RegionTooltip({ regions }: RegionTooltipProps) {
     <Html
       center
       distanceFactor={5}
+      occlude
+      zIndexRange={[1, 0]}
       style={{ pointerEvents: "none", transform: "translateY(-24px)" }}
     >
       <div className="whitespace-nowrap rounded-lg border border-emerald-500/30 bg-zinc-950/95 px-3 py-2 shadow-[0_0_12px_rgba(16,185,129,0.15)] backdrop-blur-md">

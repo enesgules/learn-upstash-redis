@@ -92,18 +92,17 @@ export default function WelcomeOverlay({
           >
             {/* Title */}
             <h2 className="mt-6 text-3xl font-bold tracking-tight sm:text-4xl">
-              <span className="text-zinc-50">Welcome to</span>
-              <br />
               <span className="text-zinc-50">Learn </span>
-              <span className="bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent">
                 Upstash Redis
               </span>
             </h2>
 
             {/* Subtitle */}
             <p className="mt-3 max-w-sm text-base leading-relaxed text-zinc-400">
-              Explore how global replication works through interactive 3D
-              visualizations.
+              Learn distributed database concepts — replication, consistency,
+              and failover — through interactive 3D visualizations of Upstash
+              Redis.
             </p>
 
             {/* Learning path */}
@@ -146,17 +145,6 @@ export default function WelcomeOverlay({
               className="mt-6 cursor-pointer rounded-full bg-emerald-500 px-8 py-3 text-sm font-medium text-zinc-950 transition-colors hover:bg-emerald-400"
             >
               Get Started
-            </motion.button>
-
-            {/* Skip */}
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.0 }}
-              onClick={dismiss}
-              className="mt-3 cursor-pointer text-sm text-zinc-600 transition-colors hover:text-zinc-400"
-            >
-              Skip intro
             </motion.button>
           </motion.div>
         </motion.div>

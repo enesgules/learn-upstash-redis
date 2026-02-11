@@ -1,16 +1,64 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, type ReactNode } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Suspense, useEffect, useRef, useMemo, type ReactNode } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
+import * as THREE from "three";
 import Globe from "./Globe";
 import RegionMarker from "./RegionMarker";
-import { groupRegionsByLocation, type Region } from "@/lib/regions";
+import { groupRegionsByLocation, getRegionById, type Region } from "@/lib/regions";
+import { latLonToVector3 } from "@/lib/geo-utils";
+import { useDatabaseStore } from "@/lib/store/database-store";
 
 function ReadySignal({ onReady }: { onReady?: () => void }) {
   useEffect(() => {
     onReady?.();
   }, [onReady]);
+  return null;
+}
+
+/**
+ * Smoothly rotates the camera to face a hovered region.
+ * Pauses auto-rotate while a region is hovered from the panel.
+ */
+function CameraController({
+  controlsRef,
+}: {
+  controlsRef: React.RefObject<InstanceType<typeof import("three-stdlib").OrbitControls> | null>;
+}) {
+  const hoveredRegionId = useDatabaseStore((s) => s.hoveredRegionId);
+  const { camera } = useThree();
+  const targetDir = useRef<THREE.Vector3 | null>(null);
+
+  useEffect(() => {
+    if (hoveredRegionId) {
+      const region = getRegionById(hoveredRegionId);
+      if (region) {
+        targetDir.current = latLonToVector3(region.lat, region.lon, 1);
+      }
+    } else {
+      targetDir.current = null;
+    }
+  }, [hoveredRegionId]);
+
+  useFrame(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
+
+    if (targetDir.current) {
+      controls.autoRotate = false;
+      // Rotate toward region, keeping the user's current zoom distance
+      const currentDistance = camera.position.length();
+      const target = targetDir.current.clone().multiplyScalar(currentDistance);
+      camera.position.lerp(target, 0.03);
+      // Maintain distance (prevent lerp from shrinking it)
+      camera.position.normalize().multiplyScalar(currentDistance);
+      controls.update();
+    } else {
+      controls.autoRotate = true;
+    }
+  });
+
   return null;
 }
 
@@ -30,6 +78,7 @@ export default function GlobeScene({
   onReady,
 }: GlobeSceneProps) {
   const regionGroups = useMemo(() => groupRegionsByLocation(), []);
+  const controlsRef = useRef<InstanceType<typeof import("three-stdlib").OrbitControls> | null>(null);
 
   return (
     <Canvas
@@ -40,6 +89,7 @@ export default function GlobeScene({
     >
       <Suspense fallback={null}>
         <ReadySignal onReady={onReady} />
+        <CameraController controlsRef={controlsRef} />
 
         {/* Lighting */}
         <ambientLight intensity={0.3} />
@@ -80,6 +130,7 @@ export default function GlobeScene({
 
         {/* Camera controls */}
         <OrbitControls
+          ref={controlsRef}
           enablePan={false}
           enableDamping
           dampingFactor={0.05}

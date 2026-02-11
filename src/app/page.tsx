@@ -4,14 +4,13 @@ import { useState, useCallback, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import GlobeScene from "@/components/globe/GlobeScene";
 import LoadingScreen from "@/components/ui/LoadingScreen";
-import WelcomeOverlay from "@/components/ui/WelcomeOverlay";
 import LearningPathNav from "@/components/ui/LearningPathNav";
+import WelcomeButton from "@/components/ui/WelcomeButton";
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 
 export default function Home() {
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const [globeReady, setGlobeReady] = useState(false);
-  const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [showTitle, setShowTitle] = useState(true);
   const isLoaded = minTimeElapsed && globeReady;
 
@@ -29,10 +28,10 @@ export default function Home() {
   // Hide title 5s after globe is loaded and welcome overlay is gone
   useEffect(() => {
     if (!isLoaded) return;
-    if (!hasSeenWelcome && !welcomeOpen) return; // welcome still pending
+    if (!hasSeenWelcome) return; // welcome still pending
     const t = setTimeout(() => setShowTitle(false), 5000);
     return () => clearTimeout(t);
-  }, [isLoaded, hasSeenWelcome, welcomeOpen]);
+  }, [isLoaded, hasSeenWelcome]);
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-[#0a0a0a]">
@@ -87,21 +86,8 @@ export default function Home() {
       {/* Loading screen (shown until globe textures load) */}
       <AnimatePresence>{!isLoaded && <LoadingScreen />}</AnimatePresence>
 
-      {/* Info button — reopens the welcome overlay */}
-      <button
-        onClick={() => setWelcomeOpen(true)}
-        className="absolute right-5 top-5 z-20 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-zinc-800 bg-zinc-950/80 text-xs text-zinc-500 backdrop-blur-sm transition-colors hover:border-zinc-700 hover:text-zinc-300"
-      >
-        ?
-      </button>
-
-      {/* Welcome overlay (first visit only + reopenable) */}
-      {isLoaded && (
-        <WelcomeOverlay
-          forceOpen={welcomeOpen}
-          onClose={() => setWelcomeOpen(false)}
-        />
-      )}
+      {/* Welcome overlay button (homepage only) */}
+      <WelcomeButton />
     </div>
   );
 }
