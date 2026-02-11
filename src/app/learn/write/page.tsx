@@ -11,6 +11,7 @@ import LearningPathNav from "@/components/ui/LearningPathNav";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { useDatabaseStore } from "@/lib/store/database-store";
 import { useWriteFlowStore } from "@/lib/store/write-flow-store";
+import { useGeolocation } from "@/lib/hooks/use-geolocation";
 import type { Region } from "@/lib/regions";
 import { playSelectSound } from "@/lib/sounds";
 
@@ -21,6 +22,16 @@ export default function WritePage() {
 
   const primaryRegion = useDatabaseStore((s) => s.primaryRegion);
   const readRegions = useDatabaseStore((s) => s.readRegions);
+  const userLocation = useGeolocation();
+
+  // Auto-place client at user's real location
+  useEffect(() => {
+    if (userLocation && !useWriteFlowStore.getState().clientLocation) {
+      useWriteFlowStore
+        .getState()
+        .setClientLocation(userLocation.lat, userLocation.lon);
+    }
+  }, [userLocation]);
 
   // Default region setup if none configured
   useEffect(() => {
@@ -61,6 +72,7 @@ export default function WritePage() {
         <GlobeScene
           onReady={handleGlobeReady}
           onRegionClick={handleRegionClick}
+          hideUserLocation
           onGlobeClick={handleGlobeClick}
           selectedRegions={readRegions}
           primaryRegion={primaryRegion}
@@ -82,7 +94,7 @@ export default function WritePage() {
       </div>
 
       {/* Top-right: Event Timeline */}
-      <div className="absolute top-4 right-4 z-20 w-[320px]">
+      <div className="absolute top-24 right-4 z-20 w-[320px]">
         <EventTimeline />
       </div>
 

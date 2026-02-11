@@ -43,6 +43,21 @@ body {
   animation-delay: 0.4s;
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(4px) translateY(-50%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(-50%);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
 /* Dark scrollbar */
 * {
   scrollbar-width: thin;

@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useDatabaseStore } from "@/lib/store/database-store";
 import { useWriteFlowStore } from "@/lib/store/write-flow-store";
 import { getRegionById } from "@/lib/regions";
+import { calculateDistance } from "@/lib/geo-utils";
 import {
   estimateLatency,
   estimateLatencyBetweenRegions,
@@ -48,6 +49,64 @@ function InsightInline() {
         replicas have the data.
       </p>
     </motion.div>
+  );
+}
+
+function PhaseNarration() {
+  const phase = useWriteFlowStore((s) => s.phase);
+  const clientLocation = useWriteFlowStore((s) => s.clientLocation);
+  const replicaStatuses = useWriteFlowStore((s) => s.replicaStatuses);
+  const primaryRegion = useDatabaseStore((s) => s.primaryRegion);
+
+  const primary = primaryRegion ? getRegionById(primaryRegion) : null;
+
+  const distanceKm = useMemo(() => {
+    if (!clientLocation || !primary) return null;
+    return Math.round(
+      calculateDistance(
+        clientLocation.lat,
+        clientLocation.lon,
+        primary.lat,
+        primary.lon
+      )
+    );
+  }, [clientLocation, primary]);
+
+  const furthestReplica = useMemo(() => {
+    if (replicaStatuses.length === 0) return null;
+    const sorted = [...replicaStatuses].sort(
+      (a, b) => b.latencyMs - a.latencyMs
+    );
+    const region = getRegionById(sorted[0].regionId);
+    return region
+      ? { city: region.city, latencyMs: sorted[0].latencyMs }
+      : null;
+  }, [replicaStatuses]);
+
+  let text: string | null = null;
+
+  if (phase === "idle" && clientLocation && primary) {
+    text = `Ready. Your command will travel ${distanceKm?.toLocaleString()}km to the primary in ${primary.city}.`;
+  } else if (phase === "to-primary" && primary) {
+    text = `Your SET command is crossing ${distanceKm?.toLocaleString()}km to reach the primary in ${primary.city}...`;
+  } else if (phase === "primary-ack") {
+    text = `Primary confirmed! Client gets OK. But ${replicaStatuses.length} read replica${replicaStatuses.length !== 1 ? "s" : ""} don't have this data yet...`;
+  } else if (phase === "replicating" && furthestReplica) {
+    text = `Data is fanning out to ${replicaStatuses.length} replica${replicaStatuses.length !== 1 ? "s" : ""}. The furthest is ${furthestReplica.city} (${furthestReplica.latencyMs}ms away)...`;
+  }
+
+  if (!text) return null;
+
+  return (
+    <motion.p
+      key={phase}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="text-[11px] leading-relaxed text-zinc-500 italic"
+    >
+      {text}
+    </motion.p>
   );
 }
 
@@ -216,6 +275,9 @@ export default function WritePanel() {
           </div>
         </div>
 
+        {/* Phase narration */}
+        <PhaseNarration />
+
         {/* Latency counter */}
         {displayedLatency !== null && (
           <motion.div
@@ -237,14 +299,20 @@ export default function WritePanel() {
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 border-t border-zinc-800/50 px-5 py-4">
+      <div className="shrink-0 border-t border-zinc-800/50 px-5 py-4 space-y-2">
         {phase === "complete" ? (
-          <button
-            onClick={handleReplay}
-            className="w-full rounded-full border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800"
-          >
-            Replay
-          </button>
+          <>
+            <button
+              onClick={handleReplay}
+              className="w-full rounded-full border border-zinc-700 bg-zinc-800/50 px-4 py-2 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-600 hover:bg-zinc-800"
+            >
+              Replay
+            </button>
+            <p className="text-[10px] text-zinc-600 text-center">
+              Click a different spot on the globe to see how distance affects
+              write latency
+            </p>
+          </>
         ) : (
           <button
             onClick={handleExecute}

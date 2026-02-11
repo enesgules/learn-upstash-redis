@@ -3,11 +3,33 @@
 import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDatabaseStore } from "@/lib/store/database-store";
-import { calculateGlobalCoverage } from "@/lib/simulation/latency";
+import { calculateGlobalCoverage, estimateLatencyStable } from "@/lib/simulation/latency";
+import { useGeolocation } from "@/lib/hooks/use-geolocation";
+import { getRegionById, regions, type Region } from "@/lib/regions";
+import { calculateDistance } from "@/lib/geo-utils";
+
+function findNearestRegion(
+  lat: number,
+  lon: number,
+  pool: Region[]
+): Region | null {
+  if (pool.length === 0) return null;
+  let nearest = pool[0];
+  let minDist = Infinity;
+  for (const r of pool) {
+    const d = calculateDistance(lat, lon, r.lat, r.lon);
+    if (d < minDist) {
+      minDist = d;
+      nearest = r;
+    }
+  }
+  return nearest;
+}
 
 export default function LatencyStats() {
   const primaryRegion = useDatabaseStore((s) => s.primaryRegion);
   const readRegions = useDatabaseStore((s) => s.readRegions);
+  const userLocation = useGeolocation();
 
   const globalReadLatency = useMemo(() => {
     if (!primaryRegion) return null;
@@ -19,6 +41,29 @@ export default function LatencyStats() {
     if (!primaryRegion) return null;
     return calculateGlobalCoverage(primaryRegion, []);
   }, [primaryRegion]);
+
+  // User's personal latency to nearest active region
+  const userLatency = useMemo(() => {
+    if (!userLocation || !primaryRegion) return null;
+    const activeRegions = [primaryRegion, ...readRegions]
+      .map(getRegionById)
+      .filter((r): r is Region => r !== undefined);
+    const nearest = findNearestRegion(
+      userLocation.lat,
+      userLocation.lon,
+      activeRegions
+    );
+    if (!nearest) return null;
+    return {
+      ms: estimateLatencyStable(
+        userLocation.lat,
+        userLocation.lon,
+        nearest.lat,
+        nearest.lon
+      ),
+      city: nearest.city,
+    };
+  }, [userLocation, primaryRegion, readRegions]);
 
   if (!primaryRegion) return null;
 
@@ -78,6 +123,28 @@ export default function LatencyStats() {
             </span>
           )}
         </div>
+
+        {/* User's personal latency */}
+        {userLatency && (
+          <div className="mt-3 border-t border-zinc-800/50 pt-3">
+            <div className="flex items-baseline justify-between">
+              <span className="text-[10px] text-zinc-500">Your latency</span>
+              <div className="flex items-baseline gap-1.5">
+                <motion.span
+                  key={userLatency.ms}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="font-mono text-sm font-semibold text-sky-400"
+                >
+                  {userLatency.ms}ms
+                </motion.span>
+                <span className="text-[10px] text-zinc-600">
+                  to {userLatency.city}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {readRegions.length === 0 && (
           <p className="mt-2 text-[10px] text-zinc-600">

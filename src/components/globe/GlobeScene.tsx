@@ -72,6 +72,7 @@ interface GlobeSceneProps {
   selectedRegions?: string[];
   primaryRegion?: string | null;
   onReady?: () => void;
+  hideUserLocation?: boolean;
 }
 
 export default function GlobeScene({
@@ -81,6 +82,7 @@ export default function GlobeScene({
   selectedRegions = [],
   primaryRegion = null,
   onReady,
+  hideUserLocation = false,
 }: GlobeSceneProps) {
   const storePrimary = useDatabaseStore((s) => s.primaryRegion);
   const activeProvider = storePrimary ? getRegionById(storePrimary)?.provider : null;
@@ -154,7 +156,7 @@ export default function GlobeScene({
         ))}
 
         {/* User's real location */}
-        {userLocation && (
+        {userLocation && !hideUserLocation && (
           <UserLocationMarker lat={userLocation.lat} lon={userLocation.lon} />
         )}
 

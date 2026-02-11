@@ -7,7 +7,7 @@ import { useOnboardingStore } from "@/lib/store/onboarding-store";
 const experiences = [
   {
     title: "Explore the Globe",
-    description: "Discover Upstash's 17 global data center locations",
+    description: "See all available regions and find which one is closest to you",
   },
   {
     title: "Build Your Database",
@@ -16,7 +16,7 @@ const experiences = [
   },
   {
     title: "Write Flow",
-    description: "Watch data travel from client to primary and fan out",
+    description: "Execute a Redis write and watch it travel to the primary, get confirmed, then replicate to every read region",
   },
   {
     title: "Read Flow",
