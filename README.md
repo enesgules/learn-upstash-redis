@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Learn Upstash Redis
+
+An interactive 3D learning platform that teaches Upstash Redis global replication concepts through hands-on visual experiences.
+
+## What is this?
+
+Distributed databases are hard to understand from docs alone. This platform lets you **see** how Upstash Redis global replication works by interacting with a 3D globe:
+
+- **Build a database** — Pick a primary region and add read replicas across the globe
+- **Write data** — Watch your data travel to the primary and replicate to all regions
+- **Read data** — See how reads route to the nearest replica for lowest latency
+- **Break things** — Kill a region and watch leader election and failover in action
+- **Race conditions** — Understand eventual consistency by racing writes against reads
+
+## Tech Stack
+
+- Next.js 16 + React 19 + TypeScript
+- React Three Fiber + Drei (3D globe visualization)
+- Tailwind CSS v4 (Upstash branding)
+- Zustand (simulation state)
+- Framer Motion (UI animations)
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to start exploring.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Experiences
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| # | Experience | Concept Taught |
+|---|-----------|----------------|
+| 1 | Interactive Globe | Upstash's 12 global AWS regions |
+| 2 | Region Builder | Primary vs read regions, network topology |
+| 3 | Write Flow | Single-leader writes, async replication |
+| 4 | Read Flow | Nearest-region routing, latency optimization |
+| 5 | Consistency Race | Eventual consistency, stale reads |
+| 6 | Failover | Leader election, high availability |
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  app/                    — Next.js pages (landing + /learn/* experiences)
+  components/
+    globe/                — 3D globe, region markers, data packets, arcs
+    panels/               — UI panels (terminal, timeline, controls)
+    ui/                   — Shared UI components (buttons, sliders)
+    layout/               — Page layout, navigation
+  lib/
+    regions.ts            — 12 AWS region data with coordinates
+    geo-utils.ts          — Lat/lon to 3D coordinate math
+    simulation/           — Animation engine, latency calc, flow logic
+    store/                — Zustand stores for database + simulation state
+```
