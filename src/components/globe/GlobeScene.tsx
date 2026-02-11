@@ -6,9 +6,11 @@ import { OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
 import Globe from "./Globe";
 import RegionMarker from "./RegionMarker";
+import UserLocationMarker from "./UserLocationMarker";
 import { regions, groupRegionsByLocation, getRegionById, type Region } from "@/lib/regions";
 import { latLonToVector3 } from "@/lib/geo-utils";
 import { useDatabaseStore } from "@/lib/store/database-store";
+import { useGeolocation } from "@/lib/hooks/use-geolocation";
 
 function ReadySignal({ onReady }: { onReady?: () => void }) {
   useEffect(() => {
@@ -86,6 +88,7 @@ export default function GlobeScene({
     return groupRegionsByLocation(filtered);
   }, [activeProvider]);
   const controlsRef = useRef<InstanceType<typeof import("three-stdlib").OrbitControls> | null>(null);
+  const userLocation = useGeolocation();
 
   return (
     <Canvas
@@ -131,6 +134,11 @@ export default function GlobeScene({
             onClick={onRegionClick}
           />
         ))}
+
+        {/* User's real location */}
+        {userLocation && (
+          <UserLocationMarker lat={userLocation.lat} lon={userLocation.lon} />
+        )}
 
         {/* Extensibility: experiences inject arcs, packets, etc. */}
         {children}
