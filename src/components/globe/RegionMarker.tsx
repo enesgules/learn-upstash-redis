@@ -17,8 +17,8 @@ interface RegionMarkerProps {
   onClick?: (region: Region) => void;
 }
 
-const MARKER_RADIUS = 0.022;
-const MARKER_ELEVATION = 0.02;
+const MARKER_RADIUS = 0.032;
+const MARKER_ELEVATION = 0.025;
 
 export default function RegionMarker({
   regions,
@@ -60,9 +60,9 @@ export default function RegionMarker({
     meshRef.current.scale.setScalar(scale);
 
     if (glowRef.current) {
-      const glowScale = hovered ? 2.8 : pulse * 1.8;
+      const glowScale = hovered ? 3.2 : pulse * 2.2;
       glowRef.current.scale.setScalar(glowScale);
-      glowRef.current.material.opacity = hovered ? 0.4 : 0.2;
+      glowRef.current.material.opacity = hovered ? 0.5 : 0.3;
     }
   });
 

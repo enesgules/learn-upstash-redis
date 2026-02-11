@@ -11,20 +11,24 @@ export default function RegionTooltip({ regions }: RegionTooltipProps) {
   const city = regions[0].city;
 
   return (
-    <Html center distanceFactor={6} style={{ pointerEvents: "none" }}>
-      <div className="whitespace-nowrap rounded-md border border-zinc-800 bg-zinc-950/95 px-2 py-1.5 shadow-lg backdrop-blur-sm">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] font-medium text-zinc-100">
+    <Html
+      center
+      distanceFactor={5}
+      style={{ pointerEvents: "none", transform: "translateY(-24px)" }}
+    >
+      <div className="whitespace-nowrap rounded-lg border border-emerald-500/30 bg-zinc-950/95 px-3 py-2 shadow-[0_0_12px_rgba(16,185,129,0.15)] backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-semibold text-zinc-50">
             {city}
           </span>
           <div className="flex gap-1">
             {regions.map((r) => (
               <span
                 key={r.id}
-                className={`rounded px-1 py-px text-[8px] font-semibold uppercase ${
+                className={`rounded-full px-1.5 py-px text-[9px] font-bold uppercase tracking-wide ${
                   r.provider === "aws"
-                    ? "bg-orange-500/10 text-orange-400"
-                    : "bg-blue-500/10 text-blue-400"
+                    ? "bg-orange-500/15 text-orange-400"
+                    : "bg-blue-500/15 text-blue-400"
                 }`}
               >
                 {r.provider}
@@ -32,9 +36,9 @@ export default function RegionTooltip({ regions }: RegionTooltipProps) {
             ))}
           </div>
         </div>
-        <div className="mt-0.5 flex flex-col gap-px">
+        <div className="mt-1 flex flex-col gap-0.5">
           {regions.map((r) => (
-            <div key={r.id} className="text-[9px] text-zinc-500">
+            <div key={r.id} className="text-[10px] font-mono text-zinc-400">
               {r.code}
             </div>
           ))}

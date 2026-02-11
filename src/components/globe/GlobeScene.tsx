@@ -24,7 +24,7 @@ export default function GlobeScene({
 
   return (
     <Canvas
-      camera={{ position: [0, 0, 7], fov: 45 }}
+      camera={{ position: [4.5, 4.4, -3.1], fov: 45 }}
       dpr={[1, 2]}
       gl={{ antialias: true }}
       style={{ background: "transparent" }}
