@@ -4,32 +4,41 @@ import { Html } from "@react-three/drei";
 import type { Region } from "@/lib/regions";
 
 interface RegionTooltipProps {
-  region: Region;
+  regions: Region[];
 }
 
-export default function RegionTooltip({ region }: RegionTooltipProps) {
+export default function RegionTooltip({ regions }: RegionTooltipProps) {
+  const city = regions[0].city;
+
   return (
-    <Html
-      center
-      distanceFactor={8}
-      style={{ pointerEvents: "none" }}
-    >
-      <div className="whitespace-nowrap rounded-lg border border-zinc-800 bg-zinc-950/95 px-3 py-2 shadow-xl backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-zinc-100">
-            {region.city}
+    <Html center distanceFactor={6} style={{ pointerEvents: "none" }}>
+      <div className="whitespace-nowrap rounded-md border border-zinc-800 bg-zinc-950/95 px-2 py-1.5 shadow-lg backdrop-blur-sm">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-medium text-zinc-100">
+            {city}
           </span>
-          <span
-            className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-              region.provider === "aws"
-                ? "bg-orange-500/10 text-orange-400"
-                : "bg-blue-500/10 text-blue-400"
-            }`}
-          >
-            {region.provider}
-          </span>
+          <div className="flex gap-1">
+            {regions.map((r) => (
+              <span
+                key={r.id}
+                className={`rounded px-1 py-px text-[8px] font-semibold uppercase ${
+                  r.provider === "aws"
+                    ? "bg-orange-500/10 text-orange-400"
+                    : "bg-blue-500/10 text-blue-400"
+                }`}
+              >
+                {r.provider}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="mt-0.5 text-xs text-zinc-500">{region.code}</div>
+        <div className="mt-0.5 flex flex-col gap-px">
+          {regions.map((r) => (
+            <div key={r.id} className="text-[9px] text-zinc-500">
+              {r.code}
+            </div>
+          ))}
+        </div>
       </div>
     </Html>
   );

@@ -193,3 +193,38 @@ export function getRegionById(id: string): Region | undefined {
 export function getRegionsByProvider(provider: Provider): Region[] {
   return regions.filter((r) => r.provider === provider);
 }
+
+export interface RegionGroup {
+  key: string;
+  lat: number;
+  lon: number;
+  regions: Region[];
+}
+
+/**
+ * Group regions that share the same (or very close) coordinates into a single marker.
+ * E.g. us-east-1 (AWS) and us-east4 (GCP) both sit in Virginia.
+ */
+export function groupRegionsByLocation(
+  regionList: Region[] = regions
+): RegionGroup[] {
+  const groups: Map<string, RegionGroup> = new Map();
+
+  for (const region of regionList) {
+    // Round to 1 decimal place to catch co-located regions
+    const key = `${region.lat.toFixed(1)},${region.lon.toFixed(1)}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.regions.push(region);
+    } else {
+      groups.set(key, {
+        key,
+        lat: region.lat,
+        lon: region.lon,
+        regions: [region],
+      });
+    }
+  }
+
+  return Array.from(groups.values());
+}

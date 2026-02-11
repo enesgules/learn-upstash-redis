@@ -9,28 +9,31 @@ import { GLOBE_RADIUS } from "./Globe";
 import RegionTooltip from "./RegionTooltip";
 
 interface RegionMarkerProps {
-  region: Region;
+  regions: Region[];
+  lat: number;
+  lon: number;
   isSelected?: boolean;
   isPrimary?: boolean;
   onClick?: (region: Region) => void;
 }
 
-const MARKER_RADIUS = 0.025;
-const MARKER_ELEVATION = 0.02;
+const MARKER_RADIUS = 0.015;
+const MARKER_ELEVATION = 0.015;
 
 export default function RegionMarker({
-  region,
+  regions,
+  lat,
+  lon,
   isSelected = false,
   isPrimary = false,
   onClick,
 }: RegionMarkerProps) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const glowRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
   const position = latLonToVector3(
-    region.lat,
-    region.lon,
+    lat,
+    lon,
     GLOBE_RADIUS + MARKER_ELEVATION
   );
 
@@ -45,28 +48,20 @@ export default function RegionMarker({
   }, []);
 
   const handleClick = useCallback(() => {
-    onClick?.(region);
-  }, [onClick, region]);
+    onClick?.(regions[0]);
+  }, [onClick, regions]);
 
-  // Pulsing animation
   useFrame((state) => {
     if (!meshRef.current) return;
-
-    const pulse = Math.sin(state.clock.elapsedTime * 2 + region.lat) * 0.3 + 1;
-    const scale = hovered ? 1.8 : isSelected || isPrimary ? 1.4 : pulse;
+    const pulse = Math.sin(state.clock.elapsedTime * 2 + lat) * 0.15 + 1;
+    const scale = hovered ? 1.6 : isSelected || isPrimary ? 1.3 : pulse;
     meshRef.current.scale.setScalar(scale);
-
-    if (glowRef.current) {
-      const glowScale = hovered ? 3 : isSelected || isPrimary ? 2.5 : pulse * 1.5;
-      glowRef.current.scale.setScalar(glowScale);
-    }
   });
 
   const color = isPrimary ? "#facc15" : "#10b981";
 
   return (
     <group position={position}>
-      {/* Core dot */}
       <mesh
         ref={meshRef}
         onPointerOver={handlePointerOver}
@@ -77,14 +72,7 @@ export default function RegionMarker({
         <meshBasicMaterial color={color} />
       </mesh>
 
-      {/* Glow sphere */}
-      <mesh ref={glowRef}>
-        <sphereGeometry args={[MARKER_RADIUS, 16, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={0.15} />
-      </mesh>
-
-      {/* Tooltip on hover */}
-      {hovered && <RegionTooltip region={region} />}
+      {hovered && <RegionTooltip regions={regions} />}
     </group>
   );
 }

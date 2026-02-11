@@ -1,17 +1,19 @@
 "use client";
 
-import { Suspense, type ReactNode } from "react";
+import { Suspense, useMemo, type ReactNode } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
-import Globe from "./Globe";
+import Globe, { type GlobeTextureId, type GlobeTint } from "./Globe";
 import RegionMarker from "./RegionMarker";
-import { regions, type Region } from "@/lib/regions";
+import { groupRegionsByLocation, type Region } from "@/lib/regions";
 
 interface GlobeSceneProps {
   children?: ReactNode;
   onRegionClick?: (region: Region) => void;
   selectedRegions?: string[];
   primaryRegion?: string | null;
+  textureId?: GlobeTextureId;
+  tint?: GlobeTint | null;
 }
 
 export default function GlobeScene({
@@ -19,10 +21,14 @@ export default function GlobeScene({
   onRegionClick,
   selectedRegions = [],
   primaryRegion = null,
+  textureId = "water-4k",
+  tint = null,
 }: GlobeSceneProps) {
+  const regionGroups = useMemo(() => groupRegionsByLocation(), []);
+
   return (
     <Canvas
-      camera={{ position: [0, 0, 5.5], fov: 45 }}
+      camera={{ position: [0, 0, 7], fov: 45 }}
       dpr={[1, 2]}
       gl={{ antialias: true }}
       style={{ background: "transparent" }}
@@ -45,15 +51,19 @@ export default function GlobeScene({
         />
 
         {/* Globe */}
-        <Globe />
+        <Globe textureId={textureId} tint={tint} />
 
-        {/* Region markers */}
-        {regions.map((region) => (
+        {/* Region markers (grouped by location) */}
+        {regionGroups.map((group) => (
           <RegionMarker
-            key={region.id}
-            region={region}
-            isSelected={selectedRegions.includes(region.id)}
-            isPrimary={primaryRegion === region.id}
+            key={group.key}
+            regions={group.regions}
+            lat={group.lat}
+            lon={group.lon}
+            isSelected={group.regions.some((r) =>
+              selectedRegions.includes(r.id)
+            )}
+            isPrimary={group.regions.some((r) => r.id === primaryRegion)}
             onClick={onRegionClick}
           />
         ))}
