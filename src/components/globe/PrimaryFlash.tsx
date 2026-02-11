@@ -10,9 +10,10 @@ interface PrimaryFlashProps {
   lat: number;
   lon: number;
   active: boolean;
+  color?: string;
 }
 
-export default function PrimaryFlash({ lat, lon, active }: PrimaryFlashProps) {
+export default function PrimaryFlash({ lat, lon, active, color = "#10b981" }: PrimaryFlashProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const progressRef = useRef(0);
   const wasActive = useRef(false);
@@ -47,7 +48,7 @@ export default function PrimaryFlash({ lat, lon, active }: PrimaryFlashProps) {
     <mesh ref={meshRef} position={position}>
       <sphereGeometry args={[1, 24, 24]} />
       <meshBasicMaterial
-        color="#10b981"
+        color={color}
         transparent
         opacity={0.6}
         blending={THREE.AdditiveBlending}

@@ -8,7 +8,7 @@ const experiences = [
   { shortTitle: "Regions", description: "Build database", href: "/learn/regions" },
   { shortTitle: "Write", description: "Replicate data", href: "/learn/write" },
   { shortTitle: "Read", description: "Nearest routing", href: "/learn/read" },
-  { shortTitle: "Consistency", description: "Stale reads", href: null },
+  { shortTitle: "Consistency", description: "Stale reads", href: "/learn/consistency" },
   { shortTitle: "Failover", description: "Leader election", href: null },
 ];
 

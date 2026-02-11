@@ -208,3 +208,23 @@ export function playResponseSound() {
   osc2.start(c.currentTime + 0.08);
   osc2.stop(c.currentTime + 0.25);
 }
+
+/** Descending tone — stale read detected */
+export function playStaleSound() {
+  if (isMuted()) return;
+  const c = getCtx();
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.connect(gain);
+  gain.connect(c.destination);
+
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(440, c.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(220, c.currentTime + 0.25);
+
+  gain.gain.setValueAtTime(0.08, c.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.3);
+
+  osc.start(c.currentTime);
+  osc.stop(c.currentTime + 0.3);
+}
