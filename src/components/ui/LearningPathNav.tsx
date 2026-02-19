@@ -59,13 +59,12 @@ export default function LearningPathNav({ activeStep = 0, onStepChange }: Learni
 
           return (
             <div key={i} className="flex items-center">
-              {isClickable ? (
-                <button onClick={() => onStepChange(i)} className="group cursor-pointer">
-                  {content}
-                </button>
-              ) : (
-                content
-              )}
+              <button
+                onClick={isClickable ? () => onStepChange(i) : undefined}
+                className={`group ${isClickable ? "cursor-pointer" : "cursor-default"}`}
+              >
+                {content}
+              </button>
 
               {/* Connector */}
               {i < experiences.length - 1 && (
