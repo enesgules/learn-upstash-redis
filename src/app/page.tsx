@@ -260,7 +260,11 @@ export default function Home() {
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-[#0a0a0a]">
       {/* Full-screen globe — stays mounted across ALL modes */}
-      <div className="absolute inset-0">
+      <div
+        className={`absolute inset-0 transition-transform duration-700 ease-in-out ${
+          isLanding ? "translate-x-0" : "translate-x-[190px]"
+        }`}
+      >
         <GlobeScene
           onReady={handleGlobeReady}
           onRegionClick={
