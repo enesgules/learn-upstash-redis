@@ -156,7 +156,7 @@ export default function GlobeScene({
               }
             }}
           >
-            <sphereGeometry args={[GLOBE_RADIUS, 64, 64]} />
+            <sphereGeometry args={[GLOBE_RADIUS, 16, 16]} />
             <meshBasicMaterial />
           </mesh>
         )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useMemo } from "react";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Region } from "@/lib/regions";
@@ -48,10 +48,9 @@ export default function RegionMarker({
   const panelHovered = hoveredRegionId !== null && regions.some((r) => r.id === hoveredRegionId);
   const showTooltip = hovered || panelHovered || isHintActive;
 
-  const position = latLonToVector3(
-    lat,
-    lon,
-    GLOBE_RADIUS + MARKER_ELEVATION
+  const position = useMemo(
+    () => latLonToVector3(lat, lon, GLOBE_RADIUS + MARKER_ELEVATION),
+    [lat, lon]
   );
 
   const handlePointerOver = useCallback(() => {

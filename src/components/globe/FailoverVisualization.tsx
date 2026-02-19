@@ -8,7 +8,7 @@ import { useDatabaseStore } from "@/lib/store/database-store";
 import { useFailoverStore } from "@/lib/store/failover-store";
 import { getRegionById } from "@/lib/regions";
 import { latLonToVector3 } from "@/lib/geo-utils";
-import { buildGreatCircleArc } from "./ConnectionArc";
+import { computeArcPoints } from "@/lib/arc-utils";
 import { GLOBE_RADIUS } from "./Globe";
 import DataPacket from "./DataPacket";
 import PrimaryFlash from "./PrimaryFlash";
@@ -21,19 +21,6 @@ import {
 
 const ANIMATION_SPEED = 0.003;
 const MIN_DURATION = 0.3;
-
-function computeArcPoints(
-  startLat: number,
-  startLon: number,
-  endLat: number,
-  endLon: number
-): THREE.Vector3[] {
-  const start = latLonToVector3(startLat, startLon, GLOBE_RADIUS);
-  const end = latLonToVector3(endLat, endLon, GLOBE_RADIUS);
-  const angularDistance = start.angleTo(end);
-  const peakHeight = 0.15 + (angularDistance / Math.PI) * 0.6;
-  return buildGreatCircleArc(startLat, startLon, endLat, endLon, 64, peakHeight);
-}
 
 /** Old arcs dissolving with fading opacity */
 function BreakingArcs({ progress }: { progress: number }) {
@@ -247,19 +234,20 @@ export default function FailoverVisualization() {
   const phaseTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
   const soundPlayedRef = useRef<Record<string, boolean>>({});
 
-  // Reset sound flags when phase returns to idle (after reset)
+  // Reset sound flags and clear pending timeouts when phase returns to idle
   useEffect(() => {
     if (phase === "idle") {
       soundPlayedRef.current = {};
+      for (const t of phaseTimeoutsRef.current) clearTimeout(t);
+      phaseTimeoutsRef.current.clear();
     }
   }, [phase]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
-    const timeouts = phaseTimeoutsRef.current;
     return () => {
-      for (const t of timeouts) clearTimeout(t);
-      timeouts.clear();
+      for (const t of phaseTimeoutsRef.current) clearTimeout(t);
+      phaseTimeoutsRef.current.clear();
     };
   }, []);
 

@@ -40,25 +40,18 @@ export default function ReplicationWave({
   useFrame(() => {
     if (!meshRef.current) return;
 
-    const innerRadius = progress * MAX_RADIUS;
-    const outerRadius = innerRadius * 1.15 + 0.01; // small minimum thickness
+    // Scale the fixed-size ring instead of recreating geometry each frame
+    const scale = progress * MAX_RADIUS;
+    meshRef.current.scale.setScalar(scale || 0.001); // avoid zero scale
     const opacity = 0.5 * (1 - progress * 0.8);
-
-    // Update geometry by replacing it
-    meshRef.current.geometry.dispose();
-    meshRef.current.geometry = new THREE.RingGeometry(
-      innerRadius,
-      outerRadius,
-      64
-    );
-
     (meshRef.current.material as THREE.MeshBasicMaterial).opacity = opacity;
     meshRef.current.visible = progress > 0 && progress < 1;
   });
 
   return (
     <mesh ref={meshRef} position={position} quaternion={quaternion}>
-      <ringGeometry args={[0, 0.01, 64]} />
+      {/* Normalized ring: inner≈0.87, outer=1.0 — scaled uniformly at runtime */}
+      <ringGeometry args={[0.87, 1, 64]} />
       <meshBasicMaterial
         color={color}
         transparent

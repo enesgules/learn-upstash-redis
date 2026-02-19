@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
@@ -59,19 +59,20 @@ export default function ConnectionArc({
 }: ConnectionArcProps) {
   const [progress, setProgress] = useState(0);
 
-  const start = latLonToVector3(startLat, startLon, GLOBE_RADIUS);
-  const end = latLonToVector3(endLat, endLon, GLOBE_RADIUS);
-  const angularDistance = start.angleTo(end);
-  const peakHeight = 0.15 + (angularDistance / Math.PI) * 0.6;
-
-  const allPoints = buildGreatCircleArc(
-    startLat,
-    startLon,
-    endLat,
-    endLon,
-    ARC_SEGMENTS,
-    peakHeight
-  );
+  const allPoints = useMemo(() => {
+    const start = latLonToVector3(startLat, startLon, GLOBE_RADIUS);
+    const end = latLonToVector3(endLat, endLon, GLOBE_RADIUS);
+    const angularDistance = start.angleTo(end);
+    const peakHeight = 0.15 + (angularDistance / Math.PI) * 0.6;
+    return buildGreatCircleArc(
+      startLat,
+      startLon,
+      endLat,
+      endLon,
+      ARC_SEGMENTS,
+      peakHeight
+    );
+  }, [startLat, startLon, endLat, endLon]);
 
   // Animate draw-in over 0.8s
   useFrame((_, delta) => {

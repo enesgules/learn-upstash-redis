@@ -329,8 +329,8 @@ export default function Home() {
       </div>
 
       {/* Gradients */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-72 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-72 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-72 bg-linear-to-b from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-72 bg-linear-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
 
       {/* ═══ Landing UI (step 0) ═══ */}
       <AnimatePresence>
@@ -360,7 +360,7 @@ export default function Home() {
                   className="mt-3 text-5xl font-bold tracking-tight"
                 >
                   <span className="text-zinc-50">Learn </span>
-                  <span className="bg-gradient-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent">
+                  <span className="bg-linear-to-r from-emerald-400 to-emerald-200 bg-clip-text text-transparent">
                     Upstash Redis
                   </span>
                 </motion.h1>

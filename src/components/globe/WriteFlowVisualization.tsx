@@ -1,15 +1,13 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
 import { useDatabaseStore } from "@/lib/store/database-store";
 import { useWriteFlowStore } from "@/lib/store/write-flow-store";
 import { getRegionById } from "@/lib/regions";
-import { latLonToVector3 } from "@/lib/geo-utils";
-import { buildGreatCircleArc } from "./ConnectionArc";
-import { GLOBE_RADIUS } from "./Globe";
+import { computeArcPoints } from "@/lib/arc-utils";
 import ClientMarker from "./ClientMarker";
 import DataPacket from "./DataPacket";
 import PrimaryFlash from "./PrimaryFlash";
@@ -19,19 +17,6 @@ import { playAckSound, playReplicateSound, playReplicaArriveSound } from "@/lib/
 // 200ms * 0.003 = 0.6s animation
 const ANIMATION_SPEED = 0.003;
 const MIN_DURATION = 0.3;
-
-function computeArcPoints(
-  startLat: number,
-  startLon: number,
-  endLat: number,
-  endLon: number
-): THREE.Vector3[] {
-  const start = latLonToVector3(startLat, startLon, GLOBE_RADIUS);
-  const end = latLonToVector3(endLat, endLon, GLOBE_RADIUS);
-  const angularDistance = start.angleTo(end);
-  const peakHeight = 0.15 + (angularDistance / Math.PI) * 0.6;
-  return buildGreatCircleArc(startLat, startLon, endLat, endLon, 64, peakHeight);
-}
 
 function ReplicationArc({
   primaryLat,
@@ -81,6 +66,13 @@ export default function WriteFlowVisualization() {
   const phase = useWriteFlowStore((s) => s.phase);
 
   const ackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (ackTimeoutRef.current) clearTimeout(ackTimeoutRef.current);
+    };
+  }, []);
 
   // Get primary region data
   const primary = primaryRegion ? getRegionById(primaryRegion) : null;

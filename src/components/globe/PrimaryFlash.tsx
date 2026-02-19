@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { latLonToVector3 } from "@/lib/geo-utils";
@@ -18,7 +18,10 @@ export default function PrimaryFlash({ lat, lon, active, color = "#10b981" }: Pr
   const progressRef = useRef(0);
   const wasActive = useRef(false);
 
-  const position = latLonToVector3(lat, lon, GLOBE_RADIUS + 0.03);
+  const position = useMemo(
+    () => latLonToVector3(lat, lon, GLOBE_RADIUS + 0.03),
+    [lat, lon]
+  );
 
   // Reset progress when active triggers
   useEffect(() => {
