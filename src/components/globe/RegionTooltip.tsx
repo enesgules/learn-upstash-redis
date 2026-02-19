@@ -5,7 +5,7 @@ import type { Region } from "@/lib/regions";
 
 interface NavigationHint {
   text: string;
-  href: string;
+  onClick: () => void;
 }
 
 interface RegionTooltipProps {
@@ -51,14 +51,14 @@ export default function RegionTooltip({ regions, navigationHint }: RegionTooltip
           ))}
         </div>
         {navigationHint && (
-          <a
-            href={navigationHint.href}
+          <button
+            onClick={navigationHint.onClick}
             style={{ pointerEvents: "auto" }}
-            className="mt-2 flex items-center gap-1 border-t border-emerald-500/20 pt-2 text-[11px] font-medium text-emerald-400 transition-colors hover:text-emerald-300"
+            className="mt-2 flex w-full cursor-pointer items-center gap-1 border-t border-emerald-500/20 pt-2 text-[11px] font-medium text-emerald-400 transition-colors hover:text-emerald-300"
           >
             {navigationHint.text}
             <span aria-hidden>&#8594;</span>
-          </a>
+          </button>
         )}
       </div>
     </Html>

@@ -1,22 +1,22 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 
 const experiences = [
-  { shortTitle: "Globe", description: "Explore regions", href: "/" },
-  { shortTitle: "Regions", description: "Build database", href: "/learn/regions" },
-  { shortTitle: "Write", description: "Replicate data", href: "/learn/write" },
-  { shortTitle: "Read", description: "Nearest routing", href: "/learn/read" },
-  { shortTitle: "Consistency", description: "Stale reads", href: "/learn/consistency" },
-  { shortTitle: "Failover", description: "Leader election", href: "/learn/failover" },
+  { shortTitle: "Globe", description: "Explore regions" },
+  { shortTitle: "Regions", description: "Build database" },
+  { shortTitle: "Write", description: "Replicate data" },
+  { shortTitle: "Read", description: "Nearest routing" },
+  { shortTitle: "Consistency", description: "Stale reads" },
+  { shortTitle: "Failover", description: "Leader election" },
 ];
 
 interface LearningPathNavProps {
   activeStep?: number;
+  onStepChange?: (step: number) => void;
 }
 
-export default function LearningPathNav({ activeStep = 0 }: LearningPathNavProps) {
+export default function LearningPathNav({ activeStep = 0, onStepChange }: LearningPathNavProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -27,17 +27,15 @@ export default function LearningPathNav({ activeStep = 0 }: LearningPathNavProps
       <div className="flex items-center gap-1">
         {experiences.map((exp, i) => {
           const isActive = i === activeStep;
-          const isClickable = exp.href !== null;
+          const isClickable = !isActive && onStepChange;
 
           const content = (
-            <div className={`flex items-center gap-2 px-2 py-1 ${isClickable && !isActive ? "cursor-pointer" : ""}`}>
+            <div className={`flex items-center gap-2 px-2 py-1 ${isClickable ? "cursor-pointer" : ""}`}>
               <div
                 className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold transition-colors ${
                   isActive
                     ? "border border-emerald-500/50 bg-emerald-400/10 text-emerald-400"
-                    : isClickable
-                      ? "border border-zinc-700 text-zinc-500 hover:border-zinc-600 hover:text-zinc-400"
-                      : "border border-zinc-800 text-zinc-600"
+                    : "border border-zinc-700 text-zinc-500 hover:border-zinc-600 hover:text-zinc-400"
                 }`}
               >
                 {i + 1}
@@ -47,9 +45,7 @@ export default function LearningPathNav({ activeStep = 0 }: LearningPathNavProps
                   className={`text-xs font-medium transition-colors ${
                     isActive
                       ? "text-zinc-200"
-                      : isClickable
-                        ? "text-zinc-500 group-hover:text-zinc-400"
-                        : "text-zinc-600"
+                      : "text-zinc-500 group-hover:text-zinc-400"
                   }`}
                 >
                   {exp.shortTitle}
@@ -63,10 +59,10 @@ export default function LearningPathNav({ activeStep = 0 }: LearningPathNavProps
 
           return (
             <div key={i} className="flex items-center">
-              {isClickable && !isActive ? (
-                <Link href={exp.href} className="group">
+              {isClickable ? (
+                <button onClick={() => onStepChange(i)} className="group cursor-pointer">
                   {content}
-                </Link>
+                </button>
               ) : (
                 content
               )}

@@ -1,28 +1,24 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+const STEP_LABELS = ["Regions", "Write Flow", "Read Flow", "Consistency", "Failover"];
 
-const steps = [
-  { path: "/", label: "Regions", href: "/learn/regions" },
-  { path: "/learn/regions", label: "Write Flow", href: "/learn/write" },
-  { path: "/learn/write", label: "Read Flow", href: "/learn/read" },
-  { path: "/learn/read", label: "Consistency", href: "/learn/consistency" },
-  { path: "/learn/consistency", label: "Failover", href: "/learn/failover" },
-];
+interface NextStepButtonProps {
+  activeStep: number;
+  onNext: () => void;
+}
 
-export default function NextStepButton() {
-  const pathname = usePathname();
-  const next = steps.find((s) => s.path === pathname);
-
-  if (!next) return null;
+export default function NextStepButton({ activeStep, onNext }: NextStepButtonProps) {
+  // No next step after failover (step 5)
+  if (activeStep >= 5) return null;
+  const label = STEP_LABELS[activeStep];
+  if (!label) return null;
 
   return (
-    <Link
-      href={next.href}
-      className="fixed right-5 top-1/2 z-30 flex -translate-y-1/2 items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 text-sm text-zinc-400 backdrop-blur-sm transition-colors hover:border-emerald-500/50 hover:text-emerald-400"
+    <button
+      onClick={onNext}
+      className="fixed right-5 top-1/2 z-30 flex -translate-y-1/2 cursor-pointer items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 text-sm text-zinc-400 backdrop-blur-sm transition-colors hover:border-emerald-500/50 hover:text-emerald-400"
     >
-      <span>{next.label}</span>
+      <span>{label}</span>
       <svg
         width="16"
         height="16"
@@ -38,6 +34,6 @@ export default function NextStepButton() {
           strokeLinejoin="round"
         />
       </svg>
-    </Link>
+    </button>
   );
 }

@@ -4,7 +4,6 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 
 const STORAGE_KEY = "sound-enabled";
-const TOOLTIP_SEEN_KEY = "sound-tooltip-seen";
 
 export default function SoundToggle() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -23,8 +22,8 @@ export default function SoundToggle() {
     const wasEnabled = localStorage.getItem(STORAGE_KEY) === "true";
     if (wasEnabled) {
       audio.play().then(() => setPlaying(true)).catch(() => {
-        // Browser blocked autoplay — keep state muted until user clicks
-        localStorage.setItem(STORAGE_KEY, "false");
+        // Browser blocked autoplay — don't reset preference,
+        // user will resume on next toggle click
       });
     }
 
@@ -34,16 +33,12 @@ export default function SoundToggle() {
     };
   }, []);
 
-  // Show tooltip once after welcome overlay is dismissed
+  // Show tooltip after welcome overlay is dismissed (every page load)
   useEffect(() => {
     if (!hasSeenWelcome) return;
-    if (localStorage.getItem(TOOLTIP_SEEN_KEY)) return;
 
     const showTimer = setTimeout(() => setShowTooltip(true), 2000);
-    const hideTimer = setTimeout(() => {
-      setShowTooltip(false);
-      localStorage.setItem(TOOLTIP_SEEN_KEY, "true");
-    }, 6000);
+    const hideTimer = setTimeout(() => setShowTooltip(false), 6000);
     return () => {
       clearTimeout(showTimer);
       clearTimeout(hideTimer);
@@ -57,7 +52,6 @@ export default function SoundToggle() {
     // Dismiss tooltip on interaction
     if (showTooltip) {
       setShowTooltip(false);
-      localStorage.setItem(TOOLTIP_SEEN_KEY, "true");
     }
 
     if (playing) {
@@ -72,7 +66,7 @@ export default function SoundToggle() {
   }, [playing, showTooltip]);
 
   return (
-    <div className="fixed right-5 top-5 z-30">
+    <div className="relative">
       <button
         onClick={toggle}
         aria-label={playing ? "Mute background sound" : "Unmute background sound"}
@@ -111,9 +105,9 @@ export default function SoundToggle() {
         )}
       </button>
 
-      {/* One-time tooltip */}
+      {/* Tooltip — appears after welcome overlay is dismissed */}
       {showTooltip && (
-        <div className="absolute right-10 top-1/2 -translate-y-1/2 animate-fade-in">
+        <div className="absolute top-1/2 right-full mr-2 -translate-y-1/2 animate-fade-in">
           <div className="whitespace-nowrap rounded-lg border border-zinc-700/50 bg-zinc-900/95 px-3 py-1.5 text-[11px] text-zinc-300 shadow-lg backdrop-blur-sm">
             Enable sound
             <div className="absolute -right-1 top-1/2 -translate-y-1/2 h-2 w-2 rotate-45 border-r border-t border-zinc-700/50 bg-zinc-900/95" />

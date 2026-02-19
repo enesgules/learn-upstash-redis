@@ -11,7 +11,7 @@ import RegionTooltip from "./RegionTooltip";
 
 interface NavigationHint {
   text: string;
-  href: string;
+  onClick: () => void;
 }
 
 interface RegionMarkerProps {

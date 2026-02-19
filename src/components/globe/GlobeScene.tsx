@@ -72,7 +72,7 @@ function CameraController({
 
 interface NavigationHint {
   text: string;
-  href: string;
+  onClick: () => void;
 }
 
 interface GlobeSceneProps {

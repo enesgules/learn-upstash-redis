@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import NextStepButton from "@/components/ui/NextStepButton";
 import SoundToggle from "@/components/ui/SoundToggle";
+import WelcomeButton from "@/components/ui/WelcomeButton";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,8 +31,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <NextStepButton />
-        <SoundToggle />
+        <div className="fixed right-5 top-5 z-30 flex items-center gap-2">
+          <SoundToggle />
+          <WelcomeButton />
+        </div>
       </body>
     </html>
   );
