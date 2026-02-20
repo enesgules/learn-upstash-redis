@@ -18,6 +18,19 @@ export const metadata: Metadata = {
   title: "Learn Upstash Redis",
   description:
     "Interactive 3D learning platform for Upstash Redis global replication concepts",
+  openGraph: {
+    title: "Learn Upstash Redis",
+    description:
+      "Interactive 3D learning platform for Upstash Redis global replication concepts",
+    images: [{ url: "/og-image.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Learn Upstash Redis",
+    description:
+      "Interactive 3D learning platform for Upstash Redis global replication concepts",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({

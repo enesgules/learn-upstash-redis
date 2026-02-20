@@ -1,3 +1,5 @@
+![Learn Upstash Redis](public/og-image.png)
+
 # Learn Upstash Redis
 
 An interactive 3D learning platform that teaches Upstash Redis global replication concepts through hands-on visual experiences.
