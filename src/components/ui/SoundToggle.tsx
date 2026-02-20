@@ -77,7 +77,7 @@ export default function SoundToggle() {
     <button
       onClick={toggle}
       aria-label={playing ? "Mute background sound" : "Unmute background sound"}
-      className="relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-zinc-800 bg-zinc-950/80 text-zinc-500 backdrop-blur-sm transition-colors hover:border-zinc-700 hover:text-zinc-300"
+      className="relative flex h-11 w-11 md:h-8 md:w-8 cursor-pointer items-center justify-center rounded-full border border-zinc-800 bg-zinc-950/80 text-zinc-500 backdrop-blur-sm transition-colors hover:border-zinc-700 hover:text-zinc-300"
     >
       {playing ? (
         <svg

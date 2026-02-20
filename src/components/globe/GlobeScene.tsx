@@ -194,7 +194,7 @@ export default function GlobeScene({
           enableDamping
           dampingFactor={0.05}
           minDistance={3.5}
-          maxDistance={10}
+          maxDistance={14}
           autoRotate
           autoRotateSpeed={0.1}
           rotateSpeed={0.5}

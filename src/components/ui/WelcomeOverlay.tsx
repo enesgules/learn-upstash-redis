@@ -89,7 +89,7 @@ export default function WelcomeOverlay({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="mx-4 flex max-w-lg flex-col items-center text-center"
+            className="mx-4 flex max-w-lg flex-col items-center text-center max-h-screen overflow-y-auto py-8"
           >
             {/* Title */}
             <h2 className="mt-6 text-3xl font-bold tracking-tight sm:text-4xl">
@@ -107,7 +107,7 @@ export default function WelcomeOverlay({
             </p>
 
             {/* Learning path */}
-            <div className="mt-8 flex flex-col items-start gap-0 text-left">
+            <div className="mt-6 md:mt-8 flex flex-col items-start gap-0 text-left max-h-[50vh] overflow-y-auto">
               {experiences.map((exp, i) => (
                 <motion.div
                   key={i}
@@ -117,12 +117,12 @@ export default function WelcomeOverlay({
                   className="flex items-start gap-3"
                 >
                   {/* Step indicator + connecting line */}
-                  <div className="flex flex-col items-center">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full border border-zinc-700 text-xs font-medium text-zinc-400">
+                  <div className="flex flex-col items-center self-stretch">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-700 text-xs font-medium text-zinc-400">
                       {i + 1}
                     </div>
                     {i < experiences.length - 1 && (
-                      <div className="h-5 w-px bg-zinc-800" />
+                      <div className="flex-1 w-px bg-zinc-800" />
                     )}
                   </div>
 

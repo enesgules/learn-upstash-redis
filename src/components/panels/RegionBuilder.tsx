@@ -202,36 +202,6 @@ export default function RegionBuilder() {
         </div>
       </div>
 
-      {/* Educational tip */}
-      <AnimatePresence>
-        {!primaryRegion && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mx-4 mt-3 mb-3 overflow-hidden rounded-lg border border-emerald-500/15 bg-emerald-500/5 px-3 py-2"
-          >
-            <p className="text-[11px] text-zinc-400">
-              Pick a primary region close to where most of your users write data.
-              All writes go here first.
-            </p>
-          </motion.div>
-        )}
-        {primaryRegion && readRegions.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mx-4 mt-3 mb-3 overflow-hidden rounded-lg border border-emerald-500/15 bg-emerald-500/5 px-3 py-2"
-          >
-            <p className="text-[11px] text-zinc-400">
-              Now add read replicas. Users near a replica get fast reads without
-              crossing the globe.
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Region list */}
       <div className="flex-1 overflow-y-auto px-4 py-3">
         <AnimatePresence mode="popLayout">

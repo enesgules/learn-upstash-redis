@@ -31,7 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <div className="fixed right-5 top-5 z-30 flex items-center gap-2">
+        <div className="fixed right-3 top-3 md:right-5 md:top-5 z-30 flex items-center gap-2">
           <SoundToggle />
           <WelcomeButton />
         </div>

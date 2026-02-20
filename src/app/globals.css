@@ -58,6 +58,11 @@ body {
   animation: fade-in 0.3s ease-out forwards;
 }
 
+/* Safe area bottom padding for mobile */
+.pb-safe {
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
 /* Dark scrollbar */
 * {
   scrollbar-width: thin;

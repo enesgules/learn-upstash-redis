@@ -5,18 +5,19 @@ const STEP_LABELS = ["Regions", "Write Flow", "Read Flow", "Consistency", "Failo
 interface NextStepButtonProps {
   activeStep: number;
   onNext: () => void;
+  onRestart?: () => void;
+  className?: string;
 }
 
-export default function NextStepButton({ activeStep, onNext }: NextStepButtonProps) {
-  // No next step after failover (step 5)
-  if (activeStep >= 5) return null;
-  const label = STEP_LABELS[activeStep];
+export default function NextStepButton({ activeStep, onNext, onRestart, className = "" }: NextStepButtonProps) {
+  const isLastStep = activeStep >= 5;
+  const label = isLastStep ? "Start Over" : STEP_LABELS[activeStep];
   if (!label) return null;
 
   return (
     <button
-      onClick={onNext}
-      className="fixed right-5 top-1/2 z-30 flex -translate-y-1/2 cursor-pointer items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 text-sm text-zinc-400 backdrop-blur-sm transition-colors hover:border-emerald-500/50 hover:text-emerald-400"
+      onClick={isLastStep ? onRestart : onNext}
+      className={`fixed right-5 top-1/2 z-30 flex -translate-y-1/2 cursor-pointer items-center gap-2 rounded-full border border-zinc-800 bg-zinc-950/80 px-4 py-2.5 text-sm text-zinc-400 backdrop-blur-sm transition-colors hover:border-emerald-500/50 hover:text-emerald-400 ${className}`}
     >
       <span>{label}</span>
       <svg
