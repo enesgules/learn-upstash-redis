@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { useDatabaseStore } from "./database-store";
-import { estimateLatencyBetweenRegions } from "@/lib/simulation/latency";
 
 export type FailoverPhase =
   | "idle"
@@ -67,7 +66,7 @@ interface FailoverState {
   setDetectionProgress: (p: number) => void;
   setElectionProgress: (p: number) => void;
   setElectionVoteProgress: (fromId: string, progress: number) => void;
-  onElectionComplete: (winnerId: string) => void;
+  onElectionComplete: () => void;
   setRecoveryProgress: (p: number) => void;
   setDrainingProgress: (p: number) => void;
   setRequestQueueVisible: (v: boolean) => void;
@@ -107,25 +106,13 @@ export const useFailoverStore = create<FailoverState>((set, get) => ({
     const { primaryRegion, readRegions } = dbStore;
     if (!primaryRegion || readRegions.length === 0) return;
 
-    // Determine winner: closest replica to old primary
-    let bestId = readRegions[0];
-    let bestLatency = Infinity;
-    for (const id of readRegions) {
-      const lat = estimateLatencyBetweenRegions(primaryRegion, id);
-      if (lat !== null && lat < bestLatency) {
-        bestLatency = lat;
-        bestId = id;
-      }
-    }
+    // In Upstash Redis, the primary region has 2 in-region replicas for HA.
+    // Leader election happens WITHIN the same region — the new primary
+    // stays in the same geographic location.
+    const newPrimary = primaryRegion;
 
-    // Build election votes (each candidate sends pulse to winner, skip self-vote)
-    const votes: ElectionVote[] = readRegions
-      .filter((id) => id !== bestId)
-      .map((id) => ({
-        fromRegionId: id,
-        toRegionId: bestId,
-        progress: 0,
-      }));
+    // No cross-region election votes — election is internal to the primary region
+    const votes: ElectionVote[] = [];
 
     // Generate queued requests at client locations (cities without Upstash regions)
     const requests: QueuedRequest[] = [
@@ -137,18 +124,18 @@ export const useFailoverStore = create<FailoverState>((set, get) => ({
     set({
       phase: "failure",
       failedRegionId: primaryRegion,
-      newPrimaryId: bestId,
+      newPrimaryId: newPrimary,
       failureFlashProgress: 0,
       arcBreakProgress: 0,
       detectionProgress: 0,
       electionProgress: 0,
       electionVotes: votes,
-      candidateRegionIds: readRegions,
+      candidateRegionIds: [],
       recoveryProgress: 0,
       drainingProgress: 0,
       queuedRequests: requests,
       requestQueueVisible: false,
-      events: [{ time: 0, label: "Primary region failed!", type: "failure" }],
+      events: [{ time: 0, label: "Primary node failed!", type: "failure" }],
       downtimeMs: 0,
       detectionTimeMs: 800,
       electionTimeMs: 1200,
@@ -171,14 +158,14 @@ export const useFailoverStore = create<FailoverState>((set, get) => ({
       ),
     })),
 
-  onElectionComplete: (winnerId) => {
+  onElectionComplete: () => {
     const state = get();
     set({
       events: [
         ...state.events,
         {
           time: state.detectionTimeMs + state.electionTimeMs,
-          label: `New primary elected!`,
+          label: `Backup replica promoted to leader!`,
           type: "elected",
         },
       ],

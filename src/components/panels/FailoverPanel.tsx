@@ -1,18 +1,17 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDatabaseStore } from "@/lib/store/database-store";
 import { useFailoverStore } from "@/lib/store/failover-store";
 import { getRegionById } from "@/lib/regions";
-import { estimateLatencyBetweenRegions } from "@/lib/simulation/latency";
 
-const PHASE_NARRATION: Record<string, (ctx: { failedCity: string; winnerCity: string; queueCount: number }) => string> = {
-  failure: ({ failedCity }) => `Primary in ${failedCity} has crashed. Incoming writes will queue...`,
+const PHASE_NARRATION: Record<string, (ctx: { failedCity: string; queueCount: number }) => string> = {
+  failure: ({ failedCity }) => `Primary node in ${failedCity} has failed. Backup replicas in the same region are standing by...`,
   detecting: ({ queueCount }) => `Health checks detecting failure. ${queueCount} write requests queued...`,
-  electing: ({ winnerCity }) => `Remaining replicas are voting for a new leader. ${winnerCity} has the lowest replication lag...`,
-  elected: ({ winnerCity }) => `${winnerCity} elected as new primary!`,
-  recovering: () => "New connections establishing. Queued requests are resuming...",
+  electing: ({ failedCity }) => `Backup replicas in ${failedCity} are electing a new leader...`,
+  elected: ({ failedCity }) => `New leader elected in ${failedCity}! Same region, minimal downtime.`,
+  recovering: () => "Read replicas reconnecting to new leader. Queued writes resuming...",
 };
 
 export default function FailoverPanel() {
@@ -21,20 +20,13 @@ export default function FailoverPanel() {
 
   const phase = useFailoverStore((s) => s.phase);
   const failedRegionId = useFailoverStore((s) => s.failedRegionId);
-  const newPrimaryId = useFailoverStore((s) => s.newPrimaryId);
   const downtimeMs = useFailoverStore((s) => s.downtimeMs);
   const queuedRequests = useFailoverStore((s) => s.queuedRequests);
   const killPrimary = useFailoverStore((s) => s.killPrimary);
   const reset = useFailoverStore((s) => s.reset);
 
   const failedRegion = failedRegionId ? getRegionById(failedRegionId) : null;
-  const newPrimary = newPrimaryId ? getRegionById(newPrimaryId) : null;
   const currentPrimary = primaryRegion ? getRegionById(primaryRegion) : null;
-
-  const latencyToOldPrimary = useMemo(() => {
-    if (!failedRegionId || !newPrimaryId) return null;
-    return estimateLatencyBetweenRegions(failedRegionId, newPrimaryId);
-  }, [failedRegionId, newPrimaryId]);
 
   const handleKill = useCallback(() => {
     killPrimary();
@@ -48,7 +40,6 @@ export default function FailoverPanel() {
     phase !== "idle" && phase !== "complete"
       ? PHASE_NARRATION[phase]?.({
           failedCity: failedRegion?.city ?? "unknown",
-          winnerCity: newPrimary?.city ?? "unknown",
           queueCount: queuedRequests.length,
         })
       : null;
@@ -68,7 +59,7 @@ export default function FailoverPanel() {
           Failover & Leader Election
         </h2>
         <p className="mt-1 text-[11px] text-zinc-500">
-          Watch how Upstash handles primary failure
+          Watch how in-region replicas take over on failure
         </p>
       </div>
 
@@ -87,8 +78,8 @@ export default function FailoverPanel() {
                   className={`h-2 w-2 rounded-full ${
                     phase === "idle"
                       ? "bg-amber-400"
-                      : phase === "complete"
-                        ? "bg-red-400 opacity-40"
+                      : phase === "elected" || phase === "recovering" || phase === "complete"
+                        ? "bg-amber-400"
                         : "bg-red-400 animate-pulse"
                   }`}
                 />
@@ -99,38 +90,31 @@ export default function FailoverPanel() {
                   className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
                     phase === "idle"
                       ? "bg-amber-500/10 text-amber-400"
-                      : "bg-red-500/10 text-red-400"
+                      : phase === "elected" || phase === "recovering" || phase === "complete"
+                        ? "bg-amber-500/10 text-amber-400"
+                        : "bg-red-500/10 text-red-400"
                   }`}
                 >
-                  {phase === "idle" ? "Primary" : "Failed"}
+                  {phase === "idle"
+                    ? "Primary"
+                    : phase === "elected" || phase === "recovering" || phase === "complete"
+                      ? "Recovered"
+                      : "Failed"}
                 </span>
               </div>
             )}
 
-            {/* Read replicas */}
+            {/* Read replicas — continue serving reads throughout failover */}
             {readRegions.map((id) => {
               const region = getRegionById(id);
               if (!region) return null;
-              const isNewPrimary =
-                id === newPrimaryId &&
-                (phase === "elected" ||
-                  phase === "recovering" ||
-                  phase === "complete");
               return (
                 <div key={id} className="flex items-center gap-2">
-                  <span
-                    className={`h-2 w-2 rounded-full ${
-                      isNewPrimary ? "bg-amber-400" : "bg-emerald-400"
-                    }`}
-                  />
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
                   <span className="text-[11px] text-zinc-300">
                     {region.city}
                   </span>
-                  {isNewPrimary && (
-                    <span className="rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-400">
-                      New Primary
-                    </span>
-                  )}
+                  <span className="text-[9px] text-zinc-600">Read</span>
                 </div>
               );
             })}
@@ -184,7 +168,7 @@ export default function FailoverPanel() {
 
         {/* Key Insight (on complete) */}
         <AnimatePresence>
-          {phase === "complete" && newPrimary && (
+          {phase === "complete" && failedRegion && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -199,24 +183,13 @@ export default function FailoverPanel() {
                 <span className="font-mono font-semibold text-cyan-400">
                   {downtimeMs}ms
                 </span>
-                . {newPrimary.city} was elected because it had the lowest
-                replication lag
-                {latencyToOldPrimary && (
-                  <>
-                    {" "}
-                    (
-                    <span className="font-mono text-emerald-400">
-                      {latencyToOldPrimary}ms
-                    </span>
-                    )
-                  </>
-                )}{" "}
-                from the old primary.
+                . A backup replica in {failedRegion.city} was promoted to
+                leader — the primary stays in the same region.
               </p>
               <p className="mt-1.5 text-[11px] text-zinc-500">
-                During failover, read replicas continue serving reads (possibly
-                stale). Only writes are briefly interrupted. Upstash handles this
-                automatically.
+                Upstash keeps multiple replicas within the primary region for high
+                availability. During failover, read replicas continue serving
+                reads. Only writes are briefly interrupted.
               </p>
             </motion.div>
           )}

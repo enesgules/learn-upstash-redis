@@ -177,13 +177,12 @@ function RecoveryArcs({
   recoveryProgress: number;
 }) {
   const readRegions = useDatabaseStore((s) => s.readRegions);
-  const failedRegionId = useFailoverStore((s) => s.failedRegionId);
   const newPrimary = getRegionById(newPrimaryId);
 
   const arcs = useMemo(() => {
     if (!newPrimary) return [];
+    // New leader is in the same region — draw arcs to all read replicas
     return readRegions
-      .filter((id) => id !== newPrimaryId && id !== failedRegionId)
       .map((id) => {
         const replica = getRegionById(id);
         if (!replica) return null;
@@ -193,7 +192,7 @@ function RecoveryArcs({
         };
       })
       .filter((a) => a !== null);
-  }, [newPrimary, readRegions, newPrimaryId, failedRegionId]);
+  }, [newPrimary, readRegions]);
 
   return (
     <group>
@@ -221,7 +220,6 @@ export default function FailoverVisualization() {
   const newPrimaryId = useFailoverStore((s) => s.newPrimaryId);
   const arcBreakProgress = useFailoverStore((s) => s.arcBreakProgress);
   const detectionProgress = useFailoverStore((s) => s.detectionProgress);
-  const electionVotes = useFailoverStore((s) => s.electionVotes);
   const electionProgress = useFailoverStore((s) => s.electionProgress);
   const recoveryProgress = useFailoverStore((s) => s.recoveryProgress);
   const drainingProgress = useFailoverStore((s) => s.drainingProgress);
@@ -280,7 +278,7 @@ export default function FailoverVisualization() {
         });
         store.addEvent({
           time: 0,
-          label: "Read replicas still serving reads",
+          label: "Read replicas continue serving reads",
           type: "resume",
         });
       }
@@ -300,7 +298,7 @@ export default function FailoverVisualization() {
         store.setPhase("electing");
         store.addEvent({
           time: store.detectionTimeMs,
-          label: "Leader election started",
+          label: "Backup replica election started",
           type: "election",
         });
       }
@@ -311,14 +309,6 @@ export default function FailoverVisualization() {
       const p = Math.min(store.electionProgress + delta / duration, 1);
       store.setElectionProgress(p);
 
-      // Advance each vote pulse
-      for (const vote of store.electionVotes) {
-        if (vote.progress < 1) {
-          const voteP = Math.min(vote.progress + delta / (duration * 0.7), 1);
-          store.setElectionVoteProgress(vote.fromRegionId, voteP);
-        }
-      }
-
       store.setDowntime(
         store.detectionTimeMs + Math.round(p * store.electionTimeMs)
       );
@@ -328,7 +318,7 @@ export default function FailoverVisualization() {
           playRecoveryChimeSound();
           soundPlayedRef.current.recovery = true;
         }
-        store.onElectionComplete(store.newPrimaryId!);
+        store.onElectionComplete();
         store.setPhase("elected");
 
         // Pause for gold flash, then recover
@@ -338,12 +328,12 @@ export default function FailoverVisualization() {
             s.setPhase("recovering");
             s.addEvent({
               time: s.detectionTimeMs + s.electionTimeMs,
-              label: "Connections re-establishing",
+              label: "Replication connections re-establishing",
               type: "reconnect",
             });
             s.addEvent({
               time: s.detectionTimeMs + s.electionTimeMs,
-              label: "Queued writes draining to new primary",
+              label: "Queued writes draining to new leader",
               type: "reconnect",
             });
           }
@@ -370,7 +360,7 @@ export default function FailoverVisualization() {
         store.setPhase("complete");
         store.addEvent({
           time: totalDowntime,
-          label: "Cluster fully recovered",
+          label: "Primary region fully recovered",
           type: "resume",
         });
       }
@@ -423,33 +413,25 @@ export default function FailoverVisualization() {
           />
         ))}
 
-      {/* Election vote pulses */}
-      {phase === "electing" &&
-        electionVotes.map((vote) => {
-          const from = getRegionById(vote.fromRegionId);
-          const to = getRegionById(vote.toRegionId);
-          if (!from || !to) return null;
-          const arcPoints = computeArcPoints(from.lat, from.lon, to.lat, to.lon);
-          return (
-            <group key={vote.fromRegionId}>
-              <Line
-                points={arcPoints}
-                color="#f59e0b"
-                lineWidth={1}
-                transparent
-                opacity={0.3}
-              />
-              {vote.progress < 1 && (
-                <DataPacket
-                  arcPoints={arcPoints}
-                  progress={vote.progress}
-                  color="#f59e0b"
-                  size={0.02}
-                />
-              )}
-            </group>
-          );
-        })}
+      {/* In-region election animation — pulsing amber rings at primary location */}
+      {failedRegion && phase === "electing" && (
+        <>
+          <ReplicationWave
+            lat={failedRegion.lat}
+            lon={failedRegion.lon}
+            progress={electionProgress}
+            color="#f59e0b"
+          />
+          {electionProgress > 0.3 && (
+            <ReplicationWave
+              lat={failedRegion.lat}
+              lon={failedRegion.lon}
+              progress={Math.max(0, (electionProgress - 0.3) / 0.7)}
+              color="#f59e0b"
+            />
+          )}
+        </>
+      )}
 
       {/* Gold flash at new primary */}
       {newPrimary &&
